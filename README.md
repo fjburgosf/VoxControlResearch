@@ -1,7 +1,7 @@
 # VoxControlResearch
 
 **Scientific software for uncertainty-aware voice intent recognition and adaptive command execution.**
-Author: Francisco Javier Burgos Flórez · Version 0.1.0
+Author: Francisco Javier Burgos Flórez · Version 1.0.0
 
 VoxControlResearch is a framework for *studying* how a voice-control system should act when a command is
 clear, ambiguous, incomplete, unknown, corrupted by speech-recognition errors, or dependent on context.
@@ -73,7 +73,7 @@ Figures and tables are generated in `results/EXP-YYYY-NNNNNN/` (see *Reproducibi
 
 ## Windows application
 
-Unzip `VoxControlResearch_0.1.0_Windows_x64.zip` and open `VoxControlResearch\VoxControlResearch.exe`.
+Unzip `VoxControlResearch_1.0.0_Windows_x64.zip` and open `VoxControlResearch\VoxControlResearch.exe`.
 No installation or Python is needed. Results, trained models and the speech-model cache are written inside
 the application folder (or in `Documents\VoxControlResearch` if that folder is read-only).
 `VoxControlResearch.exe --selftest` checks the core, the ten examples, a reduced run of every text

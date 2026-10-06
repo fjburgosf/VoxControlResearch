@@ -1,7 +1,7 @@
 # Changelog
 
-## VoxControlResearch 0.1.0 — 2026-10-04
-First version of the scientific core (`src/voxcontrol/`).
+## VoxControlResearch 1.0.0 — 2026-10-06
+First release of the scientific core (`src/voxcontrol/`).
 
 ### Added
 - UCIL: intent predictor, uncertainty estimator, OOD detector (individual detectors and a learned fusion),
