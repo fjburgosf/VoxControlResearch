@@ -1,0 +1,396 @@
+# VoxControlResearch intent registry.
+# Each intent declares its action risk level, slots, rule-baseline keywords and
+# paraphrase templates graded by difficulty:
+#   0 = canonical, 1 = synonym, 2 = syntactic reformulation, 3 = implicit/contextual.
+# Placeholders {app} {value} {query} {text} {file} {contact} are filled from `fillers`.
+version: 1
+
+intents:
+  open_app:
+    risk: low
+    slots: [app]
+    description: {es: "Abrir una aplicación", en: "Open an application"}
+    keywords:
+      es: [abre, abrir, inicia, lanza, ejecuta, arranca]
+      en: [open, launch, start, run]
+    templates:
+      es:
+        0: ["abre {app}", "abrir {app}", "abre la aplicación {app}"]
+        1: ["inicia {app}", "lanza {app}", "ejecuta {app}", "arranca {app}", "carga {app}"]
+        2: ["quiero usar {app}", "me abres {app}", "necesito tener {app} abierto", "podrías abrir {app}"]
+        3: ["voy a trabajar en {app}", "tráeme {app}", "hace falta {app} aquí"]
+      en:
+        0: ["open {app}", "launch {app}"]
+        1: ["start {app}", "fire up {app}", "run {app}"]
+        2: ["i want to use {app}", "could you open {app} for me"]
+        3: ["i need {app} now"]
+
+  close_app:
+    risk: high
+    slots: [app]
+    description: {es: "Cerrar una aplicación (puede perder trabajo sin guardar)", en: "Close an application (may lose unsaved work)"}
+    keywords:
+      es: [cierra, cerrar, termina, sal de]
+      en: [close, quit, exit]
+    templates:
+      es:
+        0: ["cierra {app}", "cerrar {app}", "cierra la aplicación {app}"]
+        1: ["termina {app}", "sal de {app}", "quita {app}", "finaliza {app}", "mata {app}"]
+        2: ["ya no necesito {app} abierto", "puedes cerrar {app}", "quiero cerrar {app}", "haz que {app} se cierre"]
+        3: ["terminé con {app}", "ya acabé en {app}", "deshazte de {app}"]
+      en:
+        0: ["close {app}", "quit {app}"]
+        1: ["exit {app}", "shut {app}", "kill {app}"]
+        2: ["i no longer need {app} open", "can you close {app}"]
+        3: ["i am done with {app}"]
+
+  switch_window:
+    risk: low
+    slots: [app]
+    description: {es: "Cambiar a la ventana de una aplicación", en: "Switch to an application window"}
+    keywords:
+      es: [cambia a, ve a, enfoca, pasate a]
+      en: [switch to, go to, focus]
+    templates:
+      es:
+        0: ["cambia a {app}", "ve a {app}", "cambia a la ventana de {app}"]
+        1: ["pásate a {app}", "muéstrame {app}", "enfoca {app}", "pon delante {app}", "regresa a {app}"]
+        2: ["quiero ver la ventana de {app}", "llévame a {app}", "trae al frente {app}", "vamos a {app}"]
+        3: ["sigamos en {app}", "volvamos a lo de {app}", "déjame ver {app} otra vez"]
+      en:
+        0: ["switch to {app}", "go to {app}"]
+        1: ["focus {app}", "show me {app}", "bring up {app}"]
+        2: ["take me to the {app} window", "bring {app} to the front"]
+        3: ["back to {app}"]
+
+  volume_up:
+    risk: low
+    slots: []
+    description: {es: "Subir el volumen", en: "Increase the volume"}
+    keywords:
+      es: [sube el volumen, aumenta el volumen, mas volumen, subir volumen]
+      en: [volume up, turn up, louder, raise the volume]
+    templates:
+      es:
+        0: ["sube el volumen", "aumenta el volumen", "subir volumen"]
+        1: ["más volumen", "súbele al volumen", "volumen más alto", "incrementa el volumen", "pon el volumen más alto"]
+        2: ["no se escucha bien sube el volumen", "quiero escuchar más fuerte", "puedes subir el sonido", "haz que suene más fuerte"]
+        3: ["no oigo nada", "está muy bajito", "casi no se oye"]
+      en:
+        0: ["turn up the volume", "volume up"]
+        1: ["louder", "increase the volume", "raise the volume"]
+        2: ["make it sound louder", "can you turn the sound up"]
+        3: ["i can barely hear it"]
+
+  volume_down:
+    risk: low
+    slots: []
+    description: {es: "Bajar el volumen", en: "Decrease the volume"}
+    keywords:
+      es: [baja el volumen, disminuye el volumen, menos volumen, bajar volumen]
+      en: [volume down, turn down, quieter, lower the volume]
+    templates:
+      es:
+        0: ["baja el volumen", "disminuye el volumen", "bajar volumen"]
+        1: ["menos volumen", "bájale al volumen", "volumen más bajo", "reduce el volumen", "pon el volumen más bajo"]
+        2: ["está muy fuerte baja el volumen", "quiero escuchar más suave", "puedes bajar el sonido", "haz que suene más bajo"]
+        3: ["está demasiado alto", "me están doliendo los oídos", "hace mucho ruido"]
+      en:
+        0: ["turn down the volume", "volume down"]
+        1: ["quieter", "decrease the volume", "lower the volume"]
+        2: ["make it sound softer", "can you turn the sound down"]
+        3: ["it is way too loud"]
+
+  set_volume:
+    risk: low
+    slots: [value]
+    description: {es: "Fijar el volumen en un valor", en: "Set the volume to a value"}
+    keywords:
+      es: [volumen al, volumen en, por ciento]
+      en: [volume to, volume at, percent]
+    templates:
+      es:
+        0: ["pon el volumen al {value} por ciento", "volumen al {value}", "ajusta el volumen a {value}"]
+        1: ["deja el volumen en {value}", "configura el volumen en {value} por ciento", "fija el volumen en {value}", "el volumen en {value}", "sube el volumen al {value} por ciento"]
+        2: ["quiero el volumen en {value} por ciento", "puedes dejar el sonido en {value}", "cambia el nivel de volumen a {value}", "que el volumen quede en {value}"]
+        3: ["volumen {value}", "sonido a {value}", "nivel {value} de volumen"]
+      en:
+        0: ["set the volume to {value} percent", "volume to {value}"]
+        1: ["put the volume at {value}", "adjust the volume to {value}", "change volume to {value} percent"]
+        2: ["i want the volume at {value} percent", "can you leave the sound at {value}"]
+        3: ["sound at {value}"]
+
+  mute:
+    risk: low
+    slots: []
+    description: {es: "Silenciar el audio", en: "Mute the audio"}
+    keywords:
+      es: [silencia, silencio, mutea, quita el sonido]
+      en: [mute, silence]
+    templates:
+      es:
+        0: ["silencia", "silenciar el audio", "pon en silencio"]
+        1: ["quita el sonido", "mutea", "apaga el sonido", "silencio", "sin sonido"]
+        2: ["no quiero escuchar nada", "deja todo en silencio", "puedes silenciar el computador", "quítale el audio a todo"]
+        3: ["que no suene nada", "necesito silencio total", "nada de ruido"]
+      en:
+        0: ["mute", "mute the sound"]
+        1: ["silence", "turn off the sound", "kill the audio"]
+        2: ["i do not want to hear anything", "can you mute the computer"]
+        3: ["no sound please"]
+
+  play_media:
+    risk: low
+    slots: []
+    description: {es: "Reproducir contenido", en: "Play media"}
+    keywords:
+      es: [reproduce, reproducir, pon musica, play]
+      en: [play, resume]
+    templates:
+      es:
+        0: ["reproduce música", "pon música", "reproducir"]
+        1: ["dale play", "reanuda la música", "continúa la canción", "pon la canción", "sigue reproduciendo"]
+        2: ["quiero escuchar música", "puedes poner algo de música", "haz que suene la música", "vuelve a poner la canción"]
+        3: ["ponme algo para trabajar", "me apetece algo de música", "un poco de ambiente musical"]
+      en:
+        0: ["play music", "play"]
+        1: ["resume the music", "continue the song", "hit play"]
+        2: ["i want to listen to music", "can you put some music on"]
+        3: ["something to listen to while i work"]
+
+  pause_media:
+    risk: low
+    slots: []
+    description: {es: "Pausar la reproducción", en: "Pause playback"}
+    keywords:
+      es: [pausa, pausar, deten la musica]
+      en: [pause, stop the song]
+    templates:
+      es:
+        0: ["pausa la música", "pausar", "pausa"]
+        1: ["detén la música", "para la canción", "detén la reproducción", "congela el video", "pon pausa"]
+        2: ["quiero pausar lo que suena", "puedes detener la música un momento", "haz una pausa en el video", "deja de reproducir"]
+        3: ["espera con la música", "un momento con la canción", "luego seguimos con el video"]
+      en:
+        0: ["pause the music", "pause"]
+        1: ["stop the song", "hold the video", "freeze playback"]
+        2: ["can you pause what is playing", "stop playing for a moment"]
+        3: ["hold on with the music"]
+
+  search_web:
+    risk: low
+    slots: [query]
+    description: {es: "Buscar en internet", en: "Search the web"}
+    keywords:
+      es: [busca, buscar, googlea, buscame]
+      en: [search, google, look up]
+    templates:
+      es:
+        0: ["busca {query}", "buscar {query}", "busca en internet {query}"]
+        1: ["googlea {query}", "investiga {query}", "consulta {query} en la web", "encuentra información sobre {query}", "búscame {query}"]
+        2: ["quiero saber sobre {query}", "puedes buscar en google {query}", "necesito información de {query}", "averigua qué hay sobre {query}"]
+        3: ["qué dice internet de {query}", "me da curiosidad {query}", "a ver qué sale de {query}"]
+      en:
+        0: ["search {query}", "search for {query}"]
+        1: ["google {query}", "look up {query}", "find information about {query}"]
+        2: ["i want to know about {query}", "can you search the web for {query}"]
+        3: ["what does the internet say about {query}"]
+
+  type_text:
+    risk: medium
+    slots: [text]
+    description: {es: "Escribir un texto dictado", en: "Type dictated text"}
+    keywords:
+      es: [escribe, escribir, redacta, teclea, anota]
+      en: [type, write]
+    templates:
+      es:
+        0: ["escribe {text}", "escribir {text}", "escribe el texto {text}"]
+        1: ["redacta {text}", "anota {text}", "dicta {text}", "teclea {text}", "pon el texto {text}"]
+        2: ["quiero que escribas {text}", "puedes escribir {text}", "agrega al documento {text}", "transcribe esto {text}"]
+        3: ["y luego pon que {text}", "añade la frase {text}", "que diga {text}"]
+      en:
+        0: ["type {text}", "write {text}"]
+        1: ["enter the text {text}", "jot down {text}", "dictate {text}"]
+        2: ["i want you to write {text}", "can you type {text}"]
+        3: ["add the sentence {text}"]
+
+  scroll_down:
+    risk: low
+    slots: []
+    description: {es: "Desplazarse hacia abajo", en: "Scroll down"}
+    keywords:
+      es: [abajo, baja la pagina]
+      en: [scroll down, page down, down]
+    templates:
+      es:
+        0: ["baja la página", "desplázate hacia abajo", "scroll abajo"]
+        1: ["baja", "más abajo", "sigue bajando", "avanza la página", "desliza hacia abajo"]
+        2: ["quiero ver lo que sigue abajo", "puedes bajar un poco la página", "muéstrame lo de más abajo", "muévete hacia abajo en el documento"]
+        3: ["qué hay después", "sigamos leyendo", "lo siguiente por favor"]
+      en:
+        0: ["scroll down", "page down"]
+        1: ["go down", "move down", "further down"]
+        2: ["show me what is below", "can you scroll down a bit"]
+        3: ["keep reading"]
+
+  scroll_up:
+    risk: low
+    slots: []
+    description: {es: "Desplazarse hacia arriba", en: "Scroll up"}
+    keywords:
+      es: [arriba, sube la pagina]
+      en: [scroll up, page up, up]
+    templates:
+      es:
+        0: ["sube la página", "desplázate hacia arriba", "scroll arriba"]
+        1: ["sube", "más arriba", "regresa arriba", "retrocede la página", "desliza hacia arriba"]
+        2: ["quiero ver lo que estaba arriba", "puedes subir un poco la página", "muéstrame lo de más arriba", "muévete hacia arriba en el documento"]
+        3: ["qué había antes", "vuelve al principio", "lo anterior por favor"]
+      en:
+        0: ["scroll up", "page up"]
+        1: ["go up", "move up", "further up"]
+        2: ["show me what is above", "can you scroll up a bit"]
+        3: ["back to the top"]
+
+  save_document:
+    risk: medium
+    slots: []
+    description: {es: "Guardar el documento", en: "Save the document"}
+    keywords:
+      es: [guarda, guardar, salva]
+      en: [save]
+    templates:
+      es:
+        0: ["guarda el documento", "guardar", "guarda el archivo"]
+        1: ["salva el documento", "graba los cambios", "almacena el archivo", "guarda esto", "guarda los cambios"]
+        2: ["no quiero perder los cambios", "puedes guardar lo que hice", "asegura el documento en disco", "deja guardado el trabajo"]
+        3: ["que no se pierda esto", "por si acaso guárdalo", "dejémoslo a salvo"]
+      en:
+        0: ["save the document", "save"]
+        1: ["save the file", "store the changes", "save this"]
+        2: ["i do not want to lose the changes", "can you save my work"]
+        3: ["keep this safe"]
+
+  send_message:
+    risk: high
+    slots: [contact]
+    description: {es: "Enviar un mensaje o correo (irreversible)", en: "Send a message or email (irreversible)"}
+    keywords:
+      es: [envia, enviar, manda, mandar]
+      en: [send, mail]
+    templates:
+      es:
+        0: ["envía el mensaje a {contact}", "enviar mensaje a {contact}", "envía el correo a {contact}"]
+        1: ["manda el mensaje a {contact}", "despacha el correo a {contact}", "remite el mensaje a {contact}", "manda esto a {contact}", "dispara el correo a {contact}"]
+        2: ["quiero que le llegue el mensaje a {contact}", "puedes mandarle el correo a {contact}", "hazle llegar esto a {contact}", "envíale lo que escribí a {contact}"]
+        3: ["ya está listo que lo reciba {contact}", "que {contact} lo vea ya", "compártelo con {contact} ahora"]
+      en:
+        0: ["send the message to {contact}", "send the email to {contact}"]
+        1: ["mail this to {contact}", "shoot the message to {contact}", "dispatch the email to {contact}"]
+        2: ["i want {contact} to get this message", "can you send what i wrote to {contact}"]
+        3: ["let {contact} see it now"]
+
+  delete_file:
+    risk: high
+    slots: [file]
+    description: {es: "Borrar un archivo (destructivo)", en: "Delete a file (destructive)"}
+    keywords:
+      es: [borra, borrar, elimina, eliminar, suprime]
+      en: [delete, remove, erase]
+    templates:
+      es:
+        0: ["borra el archivo {file}", "elimina el archivo {file}", "borrar {file}"]
+        1: ["suprime {file}", "quita el archivo {file}", "manda a la papelera {file}", "destruye {file}", "elimina {file}"]
+        2: ["ya no quiero tener {file}", "puedes borrar el archivo {file}", "deshazte del archivo {file}", "haz que desaparezca {file}"]
+        3: ["{file} sobra", "no necesito más {file}", "limpia {file} de la carpeta"]
+      en:
+        0: ["delete the file {file}", "remove {file}"]
+        1: ["erase {file}", "trash {file}", "get rid of the file {file}"]
+        2: ["i no longer want {file}", "can you delete {file}"]
+        3: ["{file} is not needed anymore"]
+
+  take_screenshot:
+    risk: low
+    slots: []
+    description: {es: "Tomar una captura de pantalla", en: "Take a screenshot"}
+    keywords:
+      es: [captura, pantallazo, screenshot]
+      en: [screenshot, capture the screen]
+    templates:
+      es:
+        0: ["toma una captura de pantalla", "captura de pantalla", "haz una captura"]
+        1: ["saca un pantallazo", "toma una foto de la pantalla", "captura la pantalla", "haz un screenshot", "guarda una imagen de la pantalla"]
+        2: ["quiero una imagen de lo que se ve", "puedes capturar lo que hay en pantalla", "registra lo que está en la pantalla", "fotografía la pantalla"]
+        3: ["esto hay que dejarlo registrado en imagen", "necesito evidencia de esto", "cápturalo tal cual"]
+      en:
+        0: ["take a screenshot", "screenshot"]
+        1: ["capture the screen", "grab a screenshot", "snap the screen"]
+        2: ["i want an image of what is on screen", "can you capture the screen"]
+        3: ["i need proof of this"]
+
+# Application gazetteer: canonical id -> category and surface forms per language.
+apps:
+  chrome: {category: browser, es: ["chrome", "google chrome"], en: ["chrome", "google chrome"]}
+  edge: {category: browser, es: ["edge", "microsoft edge"], en: ["edge", "microsoft edge"]}
+  firefox: {category: browser, es: ["firefox"], en: ["firefox"]}
+  word: {category: document, es: ["word", "microsoft word"], en: ["word", "microsoft word"]}
+  excel: {category: document, es: ["excel"], en: ["excel"]}
+  powerpoint: {category: document, es: ["powerpoint"], en: ["powerpoint"]}
+  outlook: {category: email, es: ["outlook"], en: ["outlook"]}
+  notepad: {category: document, es: ["el bloc de notas", "notepad"], en: ["notepad"]}
+  vscode: {category: document, es: ["visual studio code", "vs code"], en: ["visual studio code", "vs code"]}
+  paint: {category: document, es: ["paint"], en: ["paint"]}
+  spotify: {category: music_player, es: ["spotify"], en: ["spotify"]}
+  vlc: {category: music_player, es: ["vlc"], en: ["vlc"]}
+  whatsapp: {category: email, es: ["whatsapp"], en: ["whatsapp"]}
+  teams: {category: email, es: ["teams"], en: ["teams"]}
+  calculator: {category: utility, es: ["la calculadora"], en: ["the calculator", "calculator"]}
+  explorer: {category: file_manager, es: ["el explorador de archivos"], en: ["file explorer"]}
+
+# Generic expressions that refer to several applications (slot ambiguity).
+ambiguous_app_aliases:
+  es:
+    el navegador: [chrome, edge, firefox]
+    el editor: [notepad, vscode, paint]
+    el reproductor: [spotify, vlc]
+    el chat: [whatsapp, teams]
+  en:
+    the browser: [chrome, edge, firefox]
+    the editor: [notepad, vscode, paint]
+    the player: [spotify, vlc]
+    the chat: [whatsapp, teams]
+
+fillers:
+  es:
+    value: ["10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "100"]
+    query: ["el clima en bogotá", "recetas de arepas", "la capital de australia", "noticias de tecnología",
+            "vuelos a madrid", "el precio del dólar", "cómo funciona un motor eléctrico", "horarios del museo nacional",
+            "la historia del café", "resultados del partido", "artículos sobre aprendizaje automático", "tutoriales de python",
+            "hoteles en cartagena", "la población de colombia", "síntomas de la gripe"]
+    text: ["hola equipo nos vemos mañana", "la reunión es a las tres", "revisar la tabla cuatro", "gracias por la información",
+           "debemos repetir el experimento", "el informe está listo", "pendiente enviar la factura", "saludos cordiales",
+           "faltan los resultados finales", "llego en diez minutos", "confirmo la asistencia", "queda aprobado el presupuesto"]
+    file: ["informe.docx", "notas.txt", "foto.png", "presupuesto.xlsx", "borrador.docx", "datos.csv", "copia.zip",
+           "presentacion.pptx", "factura.pdf", "registro.log"]
+    contact: ["ana", "carlos", "maría", "el equipo", "laura", "pedro", "mi jefe", "soporte técnico", "la profesora", "juan"]
+  en:
+    value: ["10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "100"]
+    query: ["the weather in london", "pancake recipes", "the capital of australia", "technology news", "flights to madrid",
+            "the dollar exchange rate", "how an electric motor works", "museum opening hours", "the history of coffee",
+            "last night's game results", "machine learning papers", "python tutorials", "hotels in boston"]
+    text: ["hello team see you tomorrow", "the meeting is at three", "check table four", "thanks for the information",
+           "we must repeat the experiment", "the report is ready", "invoice still pending", "best regards",
+           "final results are missing", "i will be there in ten minutes"]
+    file: ["report.docx", "notes.txt", "photo.png", "budget.xlsx", "draft.docx", "data.csv", "backup.zip", "slides.pptx",
+           "invoice.pdf", "events.log"]
+    contact: ["anna", "charles", "mary", "the team", "laura", "peter", "my boss", "tech support", "the professor", "john"]
+
+# Optional politeness / discourse wrappers used to diversify surface forms.
+wrappers:
+  es:
+    prefix: ["", "", "por favor ", "oye ", "ahora ", "a ver "]
+    suffix: ["", "", " por favor", " ya", " ahora mismo", " gracias"]
+  en:
+    prefix: ["", "", "please ", "hey ", "now "]
+    suffix: ["", "", " please", " now", " right away", " thanks"]

@@ -1,0 +1,33 @@
+# Simulated users with idiosyncratic expressions absent from the global templates.
+# Used to study personalisation (M_user) separately from the global model (M_global).
+users:
+  A:
+    es:
+      - {template: "dale cuerda a la música", intent: play_media}
+      - {template: "échale más", intent: volume_up}
+      - {template: "chao {app}", intent: close_app}
+      - {template: "pégale una mirada a {query}", intent: search_web}
+      - {template: "tómale foto a esto", intent: take_screenshot}
+      - {template: "apunta que {text}", intent: type_text}
+      - {template: "tráete arriba {app}", intent: switch_window}
+      - {template: "achanta el ruido", intent: volume_down}
+  B:
+    es:
+      - {template: "cállalo", intent: mute}
+      - {template: "prende {app}", intent: open_app}
+      - {template: "suéltale el mensaje a {contact}", intent: send_message}
+      - {template: "congela todo", intent: pause_media}
+      - {template: "rueda pa abajo", intent: scroll_down}
+      - {template: "rueda pa arriba", intent: scroll_up}
+      - {template: "asegúralo", intent: save_document}
+      - {template: "fulmina {file}", intent: delete_file}
+  C:
+    en:
+      - {template: "crank it", intent: volume_up}
+      - {template: "fire off a note to {contact}", intent: send_message}
+      - {template: "nuke {file}", intent: delete_file}
+      - {template: "bring me {app}", intent: open_app}
+      - {template: "shush", intent: mute}
+      - {template: "bump the tunes", intent: play_media}
+      - {template: "dig up {query}", intent: search_web}
+      - {template: "jot that {text}", intent: type_text}

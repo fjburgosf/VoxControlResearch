@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "VoxControlResearch"
+version = "0.1.0"
+description = "VoxControlResearch: scientific software for uncertainty-aware voice intent recognition and adaptive command execution (UCIL)."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Francisco Javier Burgos Flórez" }]
+dependencies = [
+    "numpy>=1.26",
+    "scipy>=1.11",
+    "scikit-learn>=1.4",
+    "pyyaml>=6.0",
+    "matplotlib>=3.8",
+]
+
+[project.urls]
+Repository = "https://github.com/fjburgosf/VoxControlResearch"
+
+[project.optional-dependencies]
+asr = ["faster-whisper>=1.2.0"]
+live = ["sounddevice>=0.4.6"]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+voxcontrol = "voxcontrol.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+voxcontrol = ["resources/*.yaml"]

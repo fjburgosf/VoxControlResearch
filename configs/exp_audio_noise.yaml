@@ -1,0 +1,31 @@
+experiment:
+  name: audio_noise
+  type: audio_noise
+  seeds: [100, 101, 102]
+dataset:
+  languages: [es, en]
+  variants_train: 8
+  variants_cal: 5
+  variants_test: 5
+costs:
+  error: {low: 2.0, medium: 5.0, high: 20.0}
+  confirm: 0.3
+  reject: 1.0
+baselines:
+  tau_fixed: 0.7
+ucil:
+  predictor: tfidf_logreg
+  ood_detector: fused
+  calibrator: auto
+  memory_threshold: 0.70
+combined_noise_rate: 0.15
+noise_rates: [0.0, 0.05, 0.1, 0.2, 0.3]
+asr:
+  model: base
+  device: auto
+  compute_type: int8
+audio:
+  snr_db: [clean, 20, 10, 5, 0]
+  n_test: 120
+  n_cal: 120
+  cache: datasets/cache/tts_en

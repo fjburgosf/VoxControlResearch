@@ -1,0 +1,43 @@
+# Ambiguity scenarios.
+#
+# intent_ambiguous: the same words denote different intents depending on the
+#   active application category; `resolve` gives the correct intent per context.
+# slot_ambiguous: the intent is clear but the target refers to several
+#   applications; the correct system behaviour is to ask (CONFIRM with options).
+intent_ambiguous:
+  es:
+    - {text: "bájale", resolve: {music_player: volume_down, document: scroll_down, browser: scroll_down}}
+    - {text: "bájalo un poco", resolve: {music_player: volume_down, document: scroll_down, browser: scroll_down}}
+    - {text: "súbele", resolve: {music_player: volume_up, document: scroll_up, browser: scroll_up}}
+    - {text: "súbelo un poco", resolve: {music_player: volume_up, document: scroll_up, browser: scroll_up}}
+    - {text: "quítalo", resolve: {music_player: mute, file_manager: delete_file}}
+    - {text: "dale", resolve: {music_player: play_media, email: send_message}}
+    - {text: "ya está listo", resolve: {email: send_message, document: save_document}}
+    - {text: "deshazte de eso", resolve: {file_manager: delete_file, browser: close_app}}
+    - {text: "más", resolve: {music_player: volume_up, document: scroll_down}}
+    - {text: "detenlo", resolve: {music_player: pause_media, browser: close_app}}
+  en:
+    - {text: "lower it", resolve: {music_player: volume_down, document: scroll_down, browser: scroll_down}}
+    - {text: "raise it", resolve: {music_player: volume_up, document: scroll_up, browser: scroll_up}}
+    - {text: "take it off", resolve: {music_player: mute, file_manager: delete_file}}
+    - {text: "go ahead", resolve: {music_player: play_media, email: send_message}}
+    - {text: "it is ready", resolve: {email: send_message, document: save_document}}
+    - {text: "get rid of it", resolve: {file_manager: delete_file, browser: close_app}}
+
+slot_ambiguous:
+  es:
+    - {text: "abre el navegador", intent: open_app}
+    - {text: "abre el editor", intent: open_app}
+    - {text: "abre el reproductor", intent: open_app}
+    - {text: "inicia el reproductor", intent: open_app}
+    - {text: "cambia a el chat", intent: switch_window}
+    - {text: "ve a el editor", intent: switch_window}
+    - {text: "cierra el navegador", intent: close_app}
+    - {text: "cierra el chat", intent: close_app}
+  en:
+    - {text: "open the browser", intent: open_app}
+    - {text: "open the editor", intent: open_app}
+    - {text: "start the player", intent: open_app}
+    - {text: "switch to the chat", intent: switch_window}
+    - {text: "go to the editor", intent: switch_window}
+    - {text: "close the browser", intent: close_app}

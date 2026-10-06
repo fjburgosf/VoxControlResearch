@@ -1,0 +1,53 @@
+# Out-of-distribution requests: none of them maps to a registered intent.
+# "near" topics are command-like and share vocabulary with known intents
+# (e.g. "abre la puerta", "sube el brillo"); "far" topics do not.
+# Topics are split between calibration and test so OOD evaluation is topic-disjoint.
+topics:
+  home_devices:
+    kind: near
+    es: ["enciende las luces de la sala", "abre la puerta del garaje", "sube la temperatura del aire acondicionado",
+         "apaga el ventilador", "cierra las cortinas del cuarto", "baja la calefacción", "prende la lavadora",
+         "activa la alarma de la casa"]
+    en: ["turn on the living room lights", "open the garage door", "raise the air conditioning temperature",
+         "switch off the fan", "close the bedroom curtains"]
+  unsupported_system:
+    kind: near
+    es: ["imprime el documento", "apaga el computador", "conéctate a la red wifi", "cambia el fondo de pantalla",
+         "sube el brillo de la pantalla", "instala la actualización", "vacía la papelera de reciclaje",
+         "reinicia el equipo", "activa el modo avión", "cambia el idioma del teclado"]
+    en: ["print the document", "shut down the computer", "connect to the wifi network", "change the wallpaper",
+         "increase the screen brightness", "install the update"]
+  services:
+    kind: near
+    es: ["pide un taxi al aeropuerto", "reserva una mesa para dos", "compra boletos para el concierto",
+         "pide una pizza grande", "agenda una cita con el médico", "paga la factura de la luz", "reserva un vuelo a lima",
+         "llama a un domicilio"]
+    en: ["call a taxi to the airport", "book a table for two", "buy tickets for the concert", "order a large pizza",
+         "schedule a doctor appointment"]
+  mathematics:
+    kind: far
+    es: ["resuelve la ecuación cuadrática", "cuánto es la raíz cuadrada de doscientos", "demuestra el teorema de pitágoras",
+         "calcula la derivada del seno", "multiplica trescientos por veinte", "integra x al cuadrado",
+         "factoriza este polinomio", "cuál es el logaritmo de mil"]
+    en: ["solve the quadratic equation", "what is the square root of two hundred", "prove the pythagorean theorem",
+         "compute the derivative of sine", "multiply three hundred by twenty"]
+  chitchat:
+    kind: far
+    es: ["cuéntame un chiste", "cómo estás hoy", "qué opinas del fútbol", "eres una inteligencia artificial",
+         "te gusta la música clásica", "cuál es tu color favorito", "estoy aburrido", "qué hora crees que es en japón"]
+    en: ["tell me a joke", "how are you today", "what do you think about football", "are you an artificial intelligence",
+         "do you like classical music"]
+  reasoning:
+    kind: far
+    es: ["calcula la trayectoria óptima de un satélite", "explica la teoría de la relatividad", "diseña un experimento de física",
+         "predice el clima de la próxima semana", "analiza este conjunto de datos", "resume la historia de roma",
+         "compara el capitalismo y el socialismo", "evalúa la estabilidad de este puente"]
+    en: ["compute the optimal trajectory of a satellite", "explain the theory of relativity", "design a physics experiment",
+         "predict next week's weather", "analyze this dataset"]
+  personal_advice:
+    kind: far
+    es: ["qué debería cocinar hoy", "dame consejos para dormir mejor", "recomiéndame una película", "organiza mis vacaciones",
+         "ayúdame con mi tarea de historia", "cómo puedo ahorrar dinero", "qué regalo le doy a mi madre",
+         "cómo mejoro mi postura"]
+    en: ["what should i cook today", "give me tips to sleep better", "recommend me a movie", "plan my vacation",
+         "help me with my history homework"]

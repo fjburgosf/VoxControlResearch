@@ -1,0 +1,11 @@
+# Relative prior weights w(y | active application category).
+# p(y | x, c) is proportional to p(y | x) * w(y | c) ** alpha; unspecified intents have weight 1.
+categories:
+  music_player: {volume_up: 3, volume_down: 3, set_volume: 2, mute: 3, play_media: 3, pause_media: 3,
+                 scroll_down: 0.3, scroll_up: 0.3, delete_file: 0.3, send_message: 0.3}
+  document: {scroll_down: 3, scroll_up: 3, type_text: 3, save_document: 3, volume_up: 0.3, volume_down: 0.3,
+             play_media: 0.3, pause_media: 0.3, mute: 0.5}
+  browser: {scroll_down: 3, scroll_up: 3, search_web: 3, close_app: 1.5, volume_up: 0.3, volume_down: 0.3}
+  email: {send_message: 3, type_text: 2, save_document: 1.5, play_media: 0.3}
+  file_manager: {delete_file: 3, open_app: 1.5, mute: 0.3, play_media: 0.3}
+  utility: {}
