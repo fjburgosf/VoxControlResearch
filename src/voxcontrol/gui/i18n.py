@@ -255,11 +255,11 @@ TUTORIAL: list[dict] = [
      "action": ("analyse", "cierra el chat"), "check": ("analysed", "cierra el chat"), "tab": "text"},
     {"title": {"es": "4 · Una petición desconocida (OOD)", "en": "4 · An unknown request (OOD)"},
      "body": {"es": "Analice «pide un taxi al aeropuerto». No pertenece a ninguna intención registrada: el puntaje "
-                    "OOD sube, P(dentro del dominio) baja y el sistema no la ejecuta; aquí la RECHAZA. Con otras "
+                    "OOD sube, P(dentro del dominio) baja y el sistema no la ejecuta. Aquí la RECHAZA. Con otras "
                     "peticiones fuera de dominio puede pedir confirmación en lugar de rechazar, pero no fuerza la "
                     "intención más parecida.",
               "en": "Analyse “pide un taxi al aeropuerto”. It matches no registered intent: the OOD score rises, "
-                    "P(in-domain) drops and the system does not execute it; here it REJECTS. With other "
+                    "P(in-domain) drops and the system does not execute it. Here it REJECTS. With other "
                     "out-of-domain requests it may ask for confirmation instead of rejecting, but it does not force "
                     "the closest intent."},
      "action": ("analyse", "pide un taxi al aeropuerto"),

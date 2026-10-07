@@ -17,9 +17,6 @@ dependencies = [
     "matplotlib>=3.8",
 ]
 
-[project.urls]
-Repository = "https://github.com/fjburgosf/VoxControlResearch"
-
 [project.optional-dependencies]
 asr = ["faster-whisper>=1.2.0"]
 live = ["sounddevice>=0.4.6"]

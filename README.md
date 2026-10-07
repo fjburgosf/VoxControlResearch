@@ -7,19 +7,19 @@ VoxControlResearch is a framework for *studying* how a voice-control system shou
 clear, ambiguous, incomplete, unknown, corrupted by speech-recognition errors, or dependent on context.
 Instead of executing the most probable intent blindly, it estimates calibrated uncertainty and the cost of a
 wrong action and decides to **EXECUTE**, **CONFIRM** or **REJECT / CLARIFY**. Every experiment runs on a
-simulated desktop (sandbox) and can be repeated from text, audio files or datasets; no microphone, cloud
+simulated desktop (sandbox) and can be repeated from text, audio files or datasets. No microphone, cloud
 service or language-model API is required.
 
 ## Scientific contribution: UCIL
 
 **UCIL — Uncertainty-Calibrated Incremental Intent Learning** combines
 
-1. an intent predictor $p(y\mid x)$ (local TF-IDF logistic regression; other predictors pluggable);
-2. uncertainty signals: entropy, margin, max-probability, ASR word confidence, context shift;
-3. OOD detection: MSP, energy, kNN, prototype, Mahalanobis, lexical, and a learned fusion of them;
+1. an intent predictor $p(y\mid x)$ (local TF-IDF logistic regression, other predictors pluggable)
+2. uncertainty signals: entropy, margin, max-probability, ASR word confidence, context shift
+3. OOD detection: MSP, energy, kNN, prototype, Mahalanobis, lexical, and a learned fusion of them
 4. calibration: temperature scaling plus an estimator of $P(\text{correct execution}\mid x)$ selected by
-   cross-validated Brier score;
-5. risk-aware routing: $d=\arg\min_d E[C(d)\mid x]$ with an action-dependent error cost;
+   cross-validated Brier score
+5. risk-aware routing: $d=\arg\min_d E[C(d)\mid x]$ with an action-dependent error cost
 6. incremental adaptation: a per-user correction memory kept separate from the frozen global model.
 
 Every component can be switched off for ablation. The formulation, data and metrics are described in the
@@ -52,22 +52,22 @@ What the experiments show, including where UCIL does **not** win:
   (+0.026 to +0.029 in clean data, 0/10 seeds better). It spends interventions on expensive actions:
   its clarification rate rises with risk (low 0.37, medium 0.57, high 0.71) and it has no high-risk wrong
   executions, whereas B3/B4 do not order their interventions by risk.
-* **Calibration.** Temperature scaling lowers in-domain ECE from 0.131 to 0.070; UCIL's estimate of
+* **Calibration.** Temperature scaling lowers in-domain ECE from 0.131 to 0.070. UCIL's estimate of
   P(correct execution) has ECE 0.081 on in-domain + OOD data, comparable to temperature scaling (0.075),
   not better. Its risk–coverage ranking (AURC 0.203) equals that of raw confidence (0.201).
 * **OOD.** The learned fusion of detectors reaches AUROC 0.816 (far OOD 0.886, near OOD 0.752), above the
   best single detector (lexical, 0.777). Near-OOD requests such as "open the garage door" remain hard.
 * **Ablation.** Removing OOD detection raises the incorrect execution rate (0.058 → 0.082). Removing the
-  calibration layer or the risk router leaves the mean cost unchanged in this setting; removing adaptation
+  calibration layer or the risk router leaves the mean cost unchanged in this setting, and removing adaptation
   raises the cost under combined shift (0.593 → 0.637).
 * **Incremental learning (E7).** The correction memory reaches 0.996 accuracy on new expressions after 102
-  corrections with no forgetting; naive fine-tuning forgets 0.459 of previous accuracy, replay strategies
+  corrections with no forgetting. Naive fine-tuning forgets 0.459 of previous accuracy, replay strategies
   0.158–0.214.
 * **Personalisation (E8).** After 24 corrections a user's accuracy rises from 0.499 to 0.994 while global
-  and other users' accuracy stay unchanged; replay fine-tuning reaches 0.668 and lowers other users'
+  and other users' accuracy stay unchanged. Replay fine-tuning reaches 0.668 and lowers other users'
   accuracy from 0.497 to 0.381.
-* **Ambiguity (E3).** The context prior raises accuracy on context-dependent commands from 0.274 to 0.408;
-  with an ambiguous target UCIL asks with explicit options in 100 % of cases (B4: 39 %).
+* **Ambiguity (E3).** The context prior raises accuracy on context-dependent commands from 0.274 to 0.408.
+  With an ambiguous target UCIL asks with explicit options in 100 % of cases (B4: 39 %).
 
 Figures and tables are generated in `results/EXP-YYYY-NNNNNN/` (see *Reproducibility*).
 
@@ -81,15 +81,15 @@ experiment and every interface control, and writes `selftest_report.txt`.
 
 ## Installation from source (Windows 10/11, Python 3.11 or 3.12, 64-bit)
 
+From the folder of the source code:
+
 ```bat
-git clone https://github.com/fjburgosf/VoxControlResearch.git
-cd VoxControlResearch
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe -m pip install -e .
 ```
 
-Speech recognition uses `faster-whisper`; models are downloaded on first use. Without it the software
+Speech recognition uses `faster-whisper`, and models are downloaded on first use. Without it the software
 runs in text mode and shows "Speech recognition model not available".
 
 ## Quick start
@@ -102,7 +102,7 @@ run_voxcontrol.bat                        :: graphical interface
 
 ### Graphical interface
 Tabs: Home (train/load model, **named examples drop-down**), Text test (intent, calibrated confidence,
-OOD score, risk, decision and the actual decision factors; confirm in the sandbox or correct the system),
+OOD score, risk, decision and the actual decision factors, with confirmation in the sandbox or correction of the system),
 Voice (microphone or WAV/FLAC), Adaptation (stored corrections), Experiments, Results (tables and figures,
 ZIP export) and Settings (costs and model parameters with symbol and unit). The **ES | EN** button switches
 language without losing the configuration. The **Tutorial** button opens an interactive guide that walks
@@ -150,7 +150,7 @@ PNG/SVG/PDF and `logs/run.log`. Runs are deterministic for a given configuration
 
 ## Reproducible examples
 
-Each example repeats an experiment of the user manual; the figures below are what the run reports
+Each example repeats an experiment of the user manual. The figures below are what the run reports
 (deterministic for the given configuration and seeds). In the application: *Experiments* tab, choose the
 configuration, keep the seeds of the file, *Run experiment*, then open the table in *Results*.
 From source: `voxcontrol benchmark <config>`.
@@ -186,14 +186,12 @@ non-decreasing personal accuracy after consistent corrections, measured calibrat
 
 ## Safety
 The research core never touches the operating system: actions only change a simulated desktop. Commands are
-mapped to a whitelist of validated actions with typed slots; no generated shell command is ever executed.
+mapped to a whitelist of validated actions with typed slots, and no generated shell command is ever executed.
 In real-execution mode high-risk actions always require confirmation.
 
 ## Limitations
-Synthetic text data written from templates; audio experiments use synthetic English speech with white noise;
-cost values are design parameters; the local intent model is linear.
+Text data are synthetic and written from templates. Audio experiments use synthetic English speech with white
+noise. Cost values are design parameters, and the local intent model is linear.
 
 ## Contact
 Francisco Javier Burgos Flórez · fjburgosf@gmail.com
-
-Repository: https://github.com/fjburgosf/VoxControlResearch

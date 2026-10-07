@@ -109,8 +109,8 @@ def ex05(lang):
     yc = np.array([m.registry.index[s.intent] for s in d.cal])
     iso = IsotonicCalibrator().fit(evc.probs_t.max(1), evc.probs_t.argmax(1) == yc)
     temp = m.temperature.temperature
-    out = [T(lang, f"Temperatura T = {temp:.3f}; calibrador elegido por UCIL: {m.calibrator_name}",
-             f"Temperature T = {temp:.3f}; selected UCIL calibrator: {m.calibrator_name}"),
+    out = [T(lang, f"Temperatura T = {temp:.3f}, calibrador elegido por UCIL: {m.calibrator_name}",
+             f"Temperature T = {temp:.3f}, selected UCIL calibrator: {m.calibrator_name}"),
            "                 ECE     Brier   NLL"]
     names = {"uncal": T(lang, "sin calibrar", "uncalibrated"), "temp": T(lang, "temperatura", "temperature"),
              "iso": T(lang, "isotónica", "isotonic"), "ucil": "UCIL"}
@@ -118,8 +118,8 @@ def ex05(lang):
                       ("iso", iso.transform(ev.probs_t.max(1))), ("ucil", ev.p_correct)):
         r = calibration_report(conf, ok)
         out.append(f"  {names[key]:14s} {r['ece']:.4f}  {r['brier']:.4f}  {r['nll']:.4f}")
-    out.append(T(lang, "La calibración se mide en datos de prueba separados; no se asume que mejore.",
-                 "Calibration is measured on held-out test data; it is not assumed to improve."))
+    out.append(T(lang, "La calibración se mide en datos de prueba separados. No se asume que mejore.",
+                 "Calibration is measured on held-out test data. It is not assumed to improve."))
     return "\n".join(out)
 
 
@@ -214,8 +214,8 @@ EXAMPLES = {e.key: e for e in [
             {"es": "Sintetiza una orden, la transcribe con el ASR local y decide.",
              "en": "Synthesises a command, transcribes it with the local ASR and decides."}, ex02),
     Example("example_03_ambiguity", {"es": "03 · Ambigüedad y contexto", "en": "03 · Ambiguity and context"},
-            {"es": "Una misma frase según la aplicación activa; destino ambiguo con opciones.",
-             "en": "Same phrase under different active applications; ambiguous target with options."}, ex03),
+            {"es": "Una misma frase según la aplicación activa. Destino ambiguo con opciones.",
+             "en": "Same phrase under different active applications. Ambiguous target with options."}, ex03),
     Example("example_04_ood", {"es": "04 · Órdenes fuera de dominio", "en": "04 · Out-of-domain requests"},
             {"es": "Distingue órdenes conocidas de peticiones no contempladas.",
              "en": "Separates known commands from unsupported requests."}, ex04),

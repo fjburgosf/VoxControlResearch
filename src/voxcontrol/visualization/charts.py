@@ -47,7 +47,7 @@ ES = {
     "AUROC (in-domain vs OOD)": "AUROC (en dominio vs OOD)", "Clarification rate": "Tasa de confirmación",
     "Mean realised cost per command": "Costo medio realizado por orden", "Mean realised cost": "Costo medio realizado",
     "Simulated ASR error rate (per word)": "Tasa de error ASR simulada (por palabra)",
-    "SNR (dB); 40 = clean": "SNR (dB); 40 = limpio", "Number of user corrections": "Número de correcciones del usuario",
+    "SNR (dB), 40 = clean": "SNR (dB), 40 = limpio", "Number of user corrections": "Número de correcciones del usuario",
     "Accuracy on new expressions": "Exactitud en expresiones nuevas",
     "Forgetting (old-knowledge accuracy drop)": "Olvido (caída de exactitud en lo ya aprendido)",
     "Corrections from this user": "Correcciones de este usuario",
@@ -271,7 +271,7 @@ def _figures(experiment: str, tables: dict, curves_list: list, out: Path, classe
         for y, lab in (("incorrect_execution_rate", "Incorrect execution rate"), ("intent_accuracy", "Intent accuracy"),
                        ("wrong_execution_cost", "Wrong-execution cost per command"), ("mean_cost", "Mean realised cost")):
             sel = [r for r in rows if not (y.endswith("cost") and r["method"] == "B2_argmax")]
-            fig_lines(sel, "snr_x", y, "method", out, f"fig_audio_{y}", "SNR (dB); 40 = clean", lab)
+            fig_lines(sel, "snr_x", y, "method", out, f"fig_audio_{y}", "SNR (dB), 40 = clean", lab)
     elif experiment == "incremental":
         fig_lines(tables["incremental"], "n_corrections", "acc_new_expressions", "strategy", out,
                   "fig_adaptation_curve", "Number of user corrections", "Accuracy on new expressions", (0, 1.02))
