@@ -23,6 +23,9 @@ _DROP = ("/tests/", "matplotlib/mpl-data/sample_data/", "sklearn/datasets/data/"
 
 def _keep(entry):
     dest = "/" + entry[0].replace("\\", "/")
+    name = dest.rsplit("/", 1)[-1].upper()
+    if "/LICENSES/" in dest.upper() or any(k in name for k in ("LICEN", "COPYING", "NOTICE")):
+        return False
     return not any(d in dest for d in _DROP) and not dest.endswith(".lib")
 
 
