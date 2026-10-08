@@ -12,13 +12,18 @@ a = Analysis(
     binaries=binaries,
     datas=datas,
     hiddenimports=hidden,
-    excludes=["torch", "tensorflow", "pandas", "IPython", "pytest", "nvidia", "notebook", "jupyter", "lxml",
-              "docx"],
+    excludes=["torch", "tensorflow", "pandas", "IPython", "pytest", "_pytest", "py", "nvidia", "notebook", "jupyter",
+              "lxml", "docx"],
     noarchive=False,
 )
+# only what the program needs to run: no test suites, sample data sets or link libraries of the dependencies
+_DROP = ("/tests/", "matplotlib/mpl-data/sample_data/", "sklearn/datasets/data/", "sklearn/datasets/descr/",
+         "sklearn/datasets/images/", "tcltest")
+
+
 def _keep(entry):
-    dest = entry[0].replace("\\", "/")
-    return "/tests/" not in dest and not dest.endswith(".lib")
+    dest = "/" + entry[0].replace("\\", "/")
+    return not any(d in dest for d in _DROP) and not dest.endswith(".lib")
 
 
 a.datas = [d for d in a.datas if _keep(d)]

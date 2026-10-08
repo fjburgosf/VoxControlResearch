@@ -196,7 +196,7 @@ From source: `voxcontrol benchmark <config>`.
 .venv\Scripts\python.exe tools\build_exe.py
 ```
 
-The script runs PyInstaller with `packaging/VoxControlResearch.spec`, copies `configs/` and `README.md`,
+The script runs PyInstaller with `packaging/VoxControlResearch.spec`, copies `configs/`,
 checks that no internal path exceeds 120 characters and writes
 `entregables/VoxControlResearch_<version>_Windows_x64.zip`.
 

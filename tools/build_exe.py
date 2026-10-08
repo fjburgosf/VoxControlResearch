@@ -2,8 +2,8 @@ r"""Build the Windows application folder and its zip.
 
     .venv\Scripts\python.exe tools\build_exe.py
 
-Result: dist/VoxControlResearch/ (VoxControlResearch.exe, README.md, configs/ and lib/, the folder with the
-Python runtime and libraries) and entregables/VoxControlResearch_<version>_Windows_x64.zip
+Result: dist/VoxControlResearch/ (VoxControlResearch.exe, configs/ with the experiment files and lib/, the
+folder with the Python runtime and libraries) and entregables/VoxControlResearch_<version>_Windows_x64.zip
 """
 import shutil
 import subprocess
@@ -53,7 +53,6 @@ def main() -> int:
                    cwd=ROOT / "packaging", check=True)
     _third_party_notices()
     shutil.copytree(ROOT / "configs", APP / "configs", dirs_exist_ok=True)
-    shutil.copy2(ROOT / "README.md", APP / "README.md")
     longest = max((len(str(p.relative_to(DIST))) for p in APP.rglob("*")), default=0)
     if longest > MAX_PATH:
         raise SystemExit(f"an internal path has {longest} characters (limit {MAX_PATH})")
