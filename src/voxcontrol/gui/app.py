@@ -140,6 +140,7 @@ class VoxControlApp:
         if self.fig_var.get():
             self._show_figure()
         self._refresh_corrections()
+        self._show_action()
 
     def toggle_language(self):
         self.i18n.toggle()
@@ -338,6 +339,8 @@ class VoxControlApp:
             ctx = {"active_app": self.ctx_var.get(), "category": self.registry.app_category(self.ctx_var.get())}
         r = self.model.process_text(text, user=self.user_var.get() or "default", context=ctx)
         self.last_result = r
+        self._last_action = (None, None)       # the message of an earlier action no longer applies
+        self._show_action()
         self._show_result(r)
         self.events.add(("analysed", text))
         return r
@@ -378,11 +381,23 @@ class VoxControlApp:
         if choice is not None:
             self.choice_var.set(choice)
         res = self.model.execute(self.last_result, confirmed=True, choice=self.choice_var.get() or None)
-        es = self.i18n.lang == "es" and res.key in SANDBOX
-        msg = SANDBOX[res.key].format(**res.params) if es else res.message
-        self.action_msg.configure(text=self.t("executed" if res.success else "not_executed", msg=msg))
+        self._last_action = ("executed", res)
+        self._show_action()
         self._refresh_sandbox()
         return res
+
+    def _show_action(self):
+        """Message of the last action, rendered in the current language (also after switching language)."""
+        kind, value = getattr(self, "_last_action", (None, None))
+        if kind == "executed":
+            es = self.i18n.lang == "es" and value.key in SANDBOX
+            msg = SANDBOX[value.key].format(**value.params) if es else value.message
+            text = self.t("executed" if value.success else "not_executed", msg=msg)
+        elif kind == "corrected":
+            text = self.t("corrected", user=value)
+        else:
+            text = ""
+        self.action_msg.configure(text=text)
 
     def apply_correction(self, intent: str | None = None):
         if self.last_result is None or not self._need_model():
@@ -393,7 +408,8 @@ class VoxControlApp:
         user = self.user_var.get() or "default"
         self.model.correct(self.last_result, intent, user=user)
         self.model.save_corrections(self._corrections_path())
-        self.action_msg.configure(text=self.t("corrected", user=user))
+        self._last_action = ("corrected", user)
+        self._show_action()
         self.events.add("corrected")
         self._refresh_corrections()
 
@@ -401,6 +417,8 @@ class VoxControlApp:
         if self.model is not None:
             from ..sandbox.desktop import Sandbox
             self.model.sandbox = Sandbox(self.registry)
+            self._last_action = (None, None)
+            self._show_action()
             self._refresh_sandbox()
 
     def _refresh_sandbox(self):

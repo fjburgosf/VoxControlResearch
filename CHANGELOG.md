@@ -33,4 +33,5 @@ First release of the scientific core (`src/voxcontrol/`).
 - The audio experiment records its environment (TTS voice, SHA-256 of the recordings, speech model and the
   SHA-256 of its weights, device, versions).
 - The self-test checks safety postconditions and also runs reduced personalization and ablation experiments.
+- The message of the last action is rewritten in the new language when the language is switched.
 - New regression tests for all of the above.

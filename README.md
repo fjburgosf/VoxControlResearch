@@ -36,13 +36,13 @@ built to test this, not to assume it.
 Synthetic Spanish/English corpus, 17 intents, test paraphrases never seen in training. Costs: wrong
 execution 2 / 5 / 20 (low / medium / high risk), confirmation 0.3, rejection 1.
 
-| Method | Mean cost per command | Incorrect execution rate | High-risk incorrect executions | Clarification rate | Rejection rate |
+| Method | Mean cost per command | Incorrect execution rate | High-risk incorrect execution rate (count over 10 seeds) | Clarification rate | Rejection rate |
 |---|---|---|---|---|---|
-| B1 rules | 0.744 [0.675, 0.813] | 0.037 | 0.007 | 0.002 | 0.642 |
-| B2 argmax | 2.674 [2.487, 2.861] | 0.430 | 0.089 | 0.000 | 0.000 |
-| B3 fixed threshold (0.7) | 0.602 [0.544, 0.659] | 0.030 | 0.002 | 0.727 | 0.000 |
-| B4 calibrated threshold | 0.609 [0.507, 0.710] | 0.033 | 0.004 | 0.497 | 0.235 |
-| **UCIL** | **0.563 [0.522, 0.604]** | 0.058 | 0.000 | 0.442 | 0.254 |
+| B1 rules | 0.744 [0.675, 0.813] | 0.037 | 0.0073 (63) | 0.002 | 0.642 |
+| B2 argmax | 2.674 [2.487, 2.861] | 0.430 | 0.0891 (773) | 0.000 | 0.000 |
+| B3 fixed threshold (0.7) | 0.602 [0.544, 0.659] | 0.030 | 0.0020 (17) | 0.727 | 0.000 |
+| B4 calibrated threshold | 0.609 [0.507, 0.710] | 0.033 | 0.0036 (31) | 0.497 | 0.235 |
+| **UCIL** | **0.563 [0.522, 0.604]** | 0.058 | 0.0003 (3) | 0.442 | 0.254 |
 
 What the experiments show, including where UCIL does **not** win:
 
@@ -52,8 +52,9 @@ What the experiments show, including where UCIL does **not** win:
   (−0.063 [−0.084, −0.043]).
 * **Unweighted incorrect executions.** UCIL executes *more* wrong low-risk commands than B3/B4
   (+0.026 to +0.029 in clean data, 0/10 seeds better). It spends interventions on expensive actions:
-  its clarification rate rises with risk (low 0.37, medium 0.57, high 0.71) and it has no high-risk wrong
-  executions, whereas B3/B4 do not order their interventions by risk.
+  its clarification rate rises with risk (low 0.37, medium 0.57, high 0.71) and it executes the fewest
+  high-risk commands wrongly (3 of 8673 commands over the 10 seeds, against 17 for B3 and 31 for B4, not zero),
+  whereas B3/B4 do not order their interventions by risk.
 * **Calibration.** Temperature scaling lowers in-domain ECE from 0.131 to 0.070. UCIL's estimate of
   P(correct execution) has ECE 0.081 on in-domain + OOD data, comparable to temperature scaling (0.075),
   not better. Its risk–coverage ranking (AURC 0.203) equals that of raw confidence (0.201).
@@ -180,7 +181,7 @@ From source: `voxcontrol benchmark <config>`.
 |---|---|---|
 | `configs/exp_main.yaml` (seeds 100–109) | `summary_decision_metrics`, UCIL, `mean_cost` | mean 0.563, 95% CI [0.522, 0.604] |
 | `configs/exp_main.yaml` | `summary_decision_metrics`, B3_fixed_threshold, `mean_cost` | mean 0.602 |
-| `configs/exp_main.yaml` | `summary_decision_metrics`, UCIL, `high_risk_incorrect_execution_rate` | mean 0.000 |
+| `configs/exp_main.yaml` | `summary_decision_metrics`, UCIL, `high_risk_incorrect_execution_rate` | mean 0.000346 |
 | `configs/exp_main.yaml` | `summary_ood_detection`, fused, all, `auroc` | mean 0.816 |
 | `configs/exp_incremental.yaml` | `summary_incremental`, memory, 102 corrections, `acc_new_expressions` | mean 0.996 |
 | `configs/exp_incremental.yaml` | `summary_incremental`, finetune_naive, 102 corrections, `forgetting` | mean 0.459 |

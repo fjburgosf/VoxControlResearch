@@ -142,9 +142,13 @@ def test_R09_context_prior_acts_only_when_enabled(data):
     sub = data.train[:600] + data.train[-600:]
     off = UCIL(config=UCILConfig(seed=3)).fit(sub, data.cal, data.ood_cal)
     on = UCIL(config=UCILConfig(seed=3, use_context=True)).fit(sub, data.cal, data.ood_cal)
-    ctx = {"active_app": "spotify", "category": "media"}
+    ctx = {"active_app": "spotify", "category": on.registry.app_category("spotify")}
+    assert ctx["category"] == "music_player"
     assert off.process_text("súbelo", context=ctx).explanation["context_shift"] == 0.0
-    assert on.process_text("súbelo", context=ctx).explanation["context_shift"] > 0.0
+    assert on.process_text("súbelo", context=ctx).explanation["context_shift"] > 0.05
+    # an unknown category leaves the distribution unchanged (only rounding noise)
+    unknown = {"active_app": "spotify", "category": "not_a_category"}
+    assert on.process_text("súbelo", context=unknown).explanation["context_shift"] < 1e-9
 
 
 # --------------------------------------------------------------------------- R10: WAV and FLAC
@@ -255,3 +259,18 @@ def test_gui_single_seed_run_records_its_seed_and_shows_na(gui):
     app.show_result_item(table=next(t for t in app.table_combo["values"] if t.startswith("summary_")))
     rows = [app.res_tree.item(i, "values") for i in app.res_tree.get_children()]
     assert rows and all("NA" in r for r in rows)
+
+
+def test_gui_action_message_follows_language(gui):
+    new_app, root = gui
+    app = new_app()
+    _open(app.model, "whatsapp", "teams")
+    app.analyse("cierra el chat")
+    app.confirm_and_execute("close_app:teams")
+    assert "se cerró teams" in app.action_msg.cget("text")
+    app.toggle_language()
+    assert "closed teams" in app.action_msg.cget("text")
+    app.toggle_language()
+    assert "se cerró teams" in app.action_msg.cget("text")
+    app.analyse("abre spotify")                       # a new command clears the earlier message
+    assert app.action_msg.cget("text") == ""
