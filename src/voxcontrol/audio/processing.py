@@ -1,7 +1,8 @@
 """Audio I/O, preprocessing and controlled degradations.
 
 The original signal is never modified in place; every function returns a new array.
-WAV is read with the standard library; FLAC needs the optional ``soundfile`` package.
+WAV is read with the standard library and FLAC with ``soundfile`` (a dependency of the program, included in
+the Windows application). Mono and multi-channel files are accepted; ``preprocess`` mixes them to mono.
 """
 from __future__ import annotations
 

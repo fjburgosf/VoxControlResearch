@@ -121,6 +121,37 @@ class FasterWhisperRecognizer(SpeechRecognizer):
             raise ASRUnavailable(f"Speech recognition model not available ({self.model_name}): "
                                  f"download failed ({type(e).__name__}: {e})") from e
 
+    def describe(self) -> dict:
+        """Identity of the recogniser actually used: model files (SHA-256 of model.bin), device, versions."""
+        import hashlib
+        info = {"asr_engine": "faster-whisper", "asr_model": self.model_name,
+                "asr_device": getattr(getattr(self._model, "model", None), "device", None)
+                or getattr(self, "active_device", self.device), "asr_compute_type": self.compute_type}
+        try:
+            import ctranslate2
+            import faster_whisper
+            info.update(faster_whisper_version=faster_whisper.__version__, ctranslate2_version=ctranslate2.__version__)
+        except Exception:  # noqa: BLE001 - versions are informative only
+            pass
+        folder = Path(self.model_name) if Path(self.model_name).exists() else None
+        if folder is None:
+            try:
+                from ..paths import frozen, writable_root
+                if frozen():
+                    folder = writable_root() / "cache" / "models" / f"whisper-{self.model_name}"
+                else:
+                    from faster_whisper import download_model
+                    folder = Path(download_model(self.model_name, local_files_only=True))
+            except Exception:  # noqa: BLE001
+                folder = None
+        if folder is not None and (folder / "model.bin").exists():
+            h = hashlib.sha256()
+            with open(folder / "model.bin", "rb") as fh:
+                for block in iter(lambda: fh.read(1 << 20), b""):
+                    h.update(block)
+            info["asr_model_sha256"] = h.hexdigest()
+        return info
+
     def _decode(self, audio, temperature: float = 0.0):
         try:
             return self._decode_once(audio, temperature)

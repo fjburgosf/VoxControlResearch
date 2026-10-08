@@ -4,5 +4,6 @@ scikit-learn>=1.4
 pyyaml>=6.0
 matplotlib>=3.8
 faster-whisper>=1.2.0
+soundfile>=0.12
 sounddevice>=0.4.6
 comtypes>=1.2

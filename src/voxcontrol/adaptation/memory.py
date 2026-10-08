@@ -100,6 +100,22 @@ class CorrectionMemory:
         self.records.append(CorrectionRecord(user, text, wrong_intent, correct_intent, time.time(),
                                              uncertainty, model_version))
 
+    def restore(self, records: list[CorrectionRecord]) -> int:
+        """Re-add saved corrections (keeping their original data); skips ones already stored."""
+        seen = {(r.user, r.text, r.correct_intent, r.timestamp) for r in self.records}
+        added = 0
+        for r in records:
+            if (r.user, r.text, r.correct_intent, r.timestamp) in seen or r.correct_intent not in self.index:
+                continue
+            self._Z.setdefault(r.user, []).append(self.embed_fn([r.text])[0])
+            self._y.setdefault(r.user, []).append(self.index[r.correct_intent])
+            self.records.append(r)
+            added += 1
+        return added
+
+    def clear(self) -> None:
+        self._Z, self._y, self.records = {}, {}, []
+
     def size(self, user: str | None = None) -> int:
         if user is None:
             return sum(len(v) for v in self._y.values())

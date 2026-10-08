@@ -1,10 +1,20 @@
 """E5 — noisy speech: SNR -> ASR error -> intent error -> decision.
 
-Speech is synthesised locally with the operating system's text-to-speech
-(SAPI through pyttsx3) and cached; it is clean synthetic speech, not natural
-speech, which is a stated limitation. Each utterance is degraded with white
-noise at controlled SNRs and transcribed with faster-whisper; the word
+Speech is synthesised locally with the Windows text-to-speech engine (SAPI,
+called directly through comtypes) and cached. It is clean synthetic speech, not
+natural speech, which is a stated limitation. Each utterance is degraded with
+white noise at controlled SNRs and transcribed with faster-whisper, and the word
 probabilities give a real U_ASR signal.
+
+The table ``audio_environment`` records what the result depends on: the TTS
+voice and rate, the sample rate and a SHA-256 of all synthetic recordings used,
+the speech recognition model (with the SHA-256 of its weights), device and
+library versions. Identical seeds give identical results only with the same
+voice, recordings and recognition model.
+
+In ``audio_error_attribution`` the column ``intent_error`` is the error of the
+intent classifier on the reference text (no ASR), so it does not depend on the
+SNR. ``asr_induced_error`` is the additional error caused by recognition.
 """
 from __future__ import annotations
 
@@ -23,6 +33,14 @@ from ..text import normalize
 from .common import build, method_rows
 
 _RECOGNIZER: FasterWhisperRecognizer | None = None
+
+
+def tts_voice_description() -> str:
+    try:
+        import comtypes.client
+        return str(comtypes.client.CreateObject("SAPI.SpVoice").Voice.GetDescription())
+    except Exception as e:  # noqa: BLE001 - informative only
+        return f"unavailable ({type(e).__name__})"
 
 
 def synthesise(texts: list[str], cache: Path, rate: int = 0) -> dict[str, Path]:
@@ -66,7 +84,11 @@ def exp_audio(seed: int, cfg: dict) -> dict:
     cache = Path(acfg.get("cache", "datasets/cache/tts_en"))
     wavs = synthesise(sorted({s.text for s in test + cal}), cache)
     rec = _recogniser(cfg)
-    clean_audio = {t: preprocess(*load_audio(p)) for t, p in wavs.items()}
+    loaded = {t: load_audio(p) for t, p in wavs.items()}
+    clean_audio = {t: preprocess(x, sr) for t, (x, sr) in loaded.items()}
+    digest = hashlib.sha256()
+    for t in sorted(wavs):
+        digest.update(wavs[t].read_bytes())
 
     def transcribe(samples, snr_for):
         out = []
@@ -114,4 +136,9 @@ def exp_audio(seed: int, cfg: dict) -> dict:
                             "intent_error": float(np.mean(~ok_ref)),
                             "asr_induced_error": float(np.mean(ok_ref & ~ok_hyp)),
                             "asr_recovered": float(np.mean(~ok_ref & ok_hyp))})
-    return {"tables": {"audio_noise": rows, "audio_error_attribution": attribution}, "curves": {}}
+    environment = [{"seed": seed, "tts_engine": "Windows SAPI", "tts_voice": tts_voice_description(),
+                    "tts_rate": 0, "tts_sample_rate_hz": sorted({sr for _, sr in loaded.values()}),
+                    "n_recordings": len(wavs), "recordings_sha256": digest.hexdigest(),
+                    "noise": "white Gaussian", "snr_db": [str(x) for x in snrs], **rec.describe()}]
+    return {"tables": {"audio_noise": rows, "audio_error_attribution": attribution,
+                       "audio_environment": environment}, "curves": {}}

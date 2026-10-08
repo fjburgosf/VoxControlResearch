@@ -51,6 +51,10 @@ MESSAGES = {
     "typed": "typed into {app}", "scroll": "scroll {value}", "no_document": "no document is active",
     "saved": "saved {app}", "sent": "sent to {contact}", "file_not_found": "{file} not found",
     "trashed": "moved {file} to trash", "screenshot": "screenshot taken",
+    "needs_confirmation": "not executed: the decision requires explicit confirmation",
+    "needs_choice": "not executed: choose one of the options first ({options})",
+    "unresolved_slot": "not executed: unresolved slot(s) {slots}",
+    "rejected": "not executed: the request was rejected",
 }
 
 
@@ -73,7 +77,7 @@ class Sandbox:
         if intent not in self.whitelist:
             return False, f"action '{intent}' is not whitelisted"
         spec = self.registry.spec(intent)
-        missing = [s for s in spec.slots if s not in slots and not (s == "app" and intent == "close_app")]
+        missing = [s for s in spec.slots if s not in slots]
         if missing:
             return False, "missing slot(s): " + ", ".join(missing)
         if "value" in slots and not 0 <= int(slots["value"]) <= 100:
@@ -81,6 +85,14 @@ class Sandbox:
         if "app" in slots and slots["app"] not in self.registry.apps:
             return False, f"unknown application '{slots['app']}'"
         return True, "ok"
+
+    def refuse(self, intent: str, slots: dict | None, key: str, /, **params) -> ActionResult:
+        """Record an action that was not run; the desktop state is left untouched."""
+        state = copy.deepcopy(self.state.as_dict())
+        res = ActionResult(False, intent, dict(slots or {}), MESSAGES[key].format(**params), state,
+                           copy.deepcopy(state), key, params)
+        self.log.append(res)
+        return res
 
     def execute(self, intent: str, slots: dict | None = None) -> ActionResult:
         slots = dict(slots or {})
@@ -105,7 +117,7 @@ class Sandbox:
         return True, "opened", {"app": app}
 
     def _do_close_app(self, s):
-        app = s.get("app") or self.state.active_app
+        app = s["app"]
         if app not in self.state.open_apps:
             return False, "not_open", {"app": app}
         self.state.open_apps.remove(app)

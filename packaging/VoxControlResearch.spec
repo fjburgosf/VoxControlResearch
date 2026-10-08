@@ -1,7 +1,7 @@
 # PyInstaller specification for VoxControlResearch (folder distribution).
 from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs, collect_submodules
 
-hidden = collect_submodules("voxcontrol") + collect_submodules("sklearn.utils") + ["comtypes.client", "matplotlib.backends.backend_agg", "matplotlib.backends.backend_svg",
+hidden = collect_submodules("voxcontrol") + collect_submodules("sklearn.utils") + ["comtypes.client", "soundfile", "matplotlib.backends.backend_agg", "matplotlib.backends.backend_svg",
                                                                                    "matplotlib.backends.backend_pdf"]
 datas = collect_data_files("voxcontrol") + collect_data_files("faster_whisper")
 binaries = collect_dynamic_libs("ctranslate2")

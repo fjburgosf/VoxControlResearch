@@ -13,14 +13,15 @@ def describe(values) -> dict:
     if v.size == 0:
         return {"n": 0}
     out = {"n": int(v.size), "mean": float(v.mean()), "median": float(np.median(v)),
-           "sd": float(v.std(ddof=1)) if v.size > 1 else 0.0,
+           "sd": float(v.std(ddof=1)) if v.size > 1 else float("nan"),
            "q1": float(np.percentile(v, 25)), "q3": float(np.percentile(v, 75)),
            "min": float(v.min()), "max": float(v.max())}
     if v.size > 1:
         half = sps.t.ppf(0.975, v.size - 1) * out["sd"] / np.sqrt(v.size)
         out["ci95_low"], out["ci95_high"] = out["mean"] - half, out["mean"] + half
     else:
-        out["ci95_low"] = out["ci95_high"] = out["mean"]
+        # one seed says nothing about variability between seeds: SD and the t interval are not estimable
+        out["ci95_low"] = out["ci95_high"] = float("nan")
     return out
 
 

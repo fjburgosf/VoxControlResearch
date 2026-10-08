@@ -7,8 +7,10 @@ VoxControlResearch is a framework for *studying* how a voice-control system shou
 clear, ambiguous, incomplete, unknown, corrupted by speech-recognition errors, or dependent on context.
 Instead of executing the most probable intent blindly, it estimates calibrated uncertainty and the cost of a
 wrong action and decides to **EXECUTE**, **CONFIRM** or **REJECT / CLARIFY**. Every experiment runs on a
-simulated desktop (sandbox) and can be repeated from text, audio files or datasets. No microphone, cloud
-service or language-model API is required.
+simulated desktop (sandbox) and can be repeated from text, audio files or datasets. No cloud service or
+language-model API is used. The text mode, the text experiments and nine of the ten examples work offline and
+without a microphone. The voice features need the speech recognition model, which is downloaded once on first
+use, and example 02 and the audio experiment E5 also need the Windows text-to-speech engine (SAPI).
 
 ## Scientific contribution: UCIL
 
@@ -76,8 +78,11 @@ Figures and tables are generated in `results/EXP-YYYY-NNNNNN/` (see *Reproducibi
 Unzip `VoxControlResearch_1.0.0_Windows_x64.zip` and open `VoxControlResearch\VoxControlResearch.exe`.
 No installation or Python is needed. Results, trained models and the speech-model cache are written inside
 the application folder (or in `Documents\VoxControlResearch` if that folder is read-only).
-`VoxControlResearch.exe --selftest` checks the core, the ten examples, a reduced run of every text
-experiment and every interface control, and writes `selftest_report.txt`.
+`VoxControlResearch.exe --selftest` writes `selftest_report.txt`. It checks the core and the safety
+postconditions of the simulated desktop, the ten examples (example 02 with real synthetic speech and speech
+recognition), reading WAV and FLAC files (mono and stereo), a reduced run of each text experiment type (main, ambiguity, asr_text_noise, incremental,
+combined_shift, personalization, ablation) and every tab, button, language and tutorial step of the interface.
+It does not run the audio experiment E5, and in the interface part the voice tab uses a simulated recogniser.
 
 ## Installation from source (Windows 10/11, Python 3.11 or 3.12, 64-bit)
 
@@ -102,11 +107,20 @@ run_voxcontrol.bat                        :: graphical interface
 
 ### Graphical interface
 Tabs: Home (train/load model, **named examples drop-down**), Text test (intent, calibrated confidence,
-OOD score, risk, decision and the actual decision factors, with confirmation in the sandbox or correction of the system),
-Voice (microphone or WAV/FLAC), Adaptation (stored corrections), Experiments, Results (tables and figures,
-ZIP export) and Settings (costs and model parameters with symbol and unit). The **ES | EN** button switches
-language without losing the configuration. The **Tutorial** button opens an interactive guide that walks
-through a complete experiment and can perform each step.
+OOD score, risk, decision and the actual decision factors, with confirmation in the sandbox or correction of the
+system), Voice (microphone or WAV/FLAC, mono or stereo), Adaptation (stored corrections), Experiments, Results
+(tables and figures, ZIP export) and Settings (costs and model parameters with symbol and unit, use of the
+context prior). The **ES | EN** button switches language without losing the configuration. The **Tutorial**
+button opens an interactive guide that walks through a complete experiment and can perform each step.
+
+* When the decision is CONFIRM and there are several options (for example two chat applications), nothing runs
+  until one is chosen under *Option to run*. An action whose slots are ambiguous, missing or invalid never runs.
+* With *Always confirm high-risk actions* (on by default) a high-risk action is never executed directly.
+* Corrections are saved automatically in `models/corrections.json` and are kept after closing the program and
+  after retraining. *Delete all corrections* removes them.
+* The Settings tab changes only the interactive model. Each experiment uses exclusively the parameters of its
+  YAML file, and choosing a file in *Experiments* loads its seeds.
+* Load only model files you created: a `.pkl` file of unknown origin can run code.
 
 ### Python API
 ```python
@@ -114,7 +128,10 @@ from voxcontrol.api import VoxModel
 model = VoxModel.train(seed=0)
 r = model.process_text("abre el navegador")
 print(r.intent, r.slots, r.confidence, r.calibrated_confidence, r.ood_score, r.decision, r.options)
+res = model.execute(r, confirmed=True)   # with several options also pass choice=<the option the user chose>
+print(res.success, res.message)          # always on the simulated desktop
 model.correct(r, correct_intent="open_app", user="ana")
+model.save_corrections("corrections.json")
 model.process_audio("command.wav")
 ```
 
@@ -146,7 +163,11 @@ voxcontrol gui
 Each run creates `results/EXP-YYYY-NNNNNN/` with `config.yaml`, `metadata.json` (software version, seeds,
 library versions, platform), per-seed CSV tables, `summary_*.csv` (mean, SD, median, IQR, 95% CI),
 `comparisons_*.csv` (paired differences, Cohen's d_z, Wilcoxon) after `voxcontrol analyze`, figures in
-PNG/SVG/PDF and `logs/run.log`. Runs are deterministic for a given configuration and seed.
+PNG/SVG/PDF and `logs/run.log`. Runs are deterministic for a given configuration and seed. With a single
+seed the SD and the 95% CI are not estimable and are left empty (shown as NA in the application). The audio
+experiment also writes `audio_environment.csv` (TTS voice, SHA-256 of the synthetic recordings, speech
+recognition model with the SHA-256 of its weights, device and library versions): its results are identical
+only with the same voice, recordings and recognition model.
 
 ## Reproducible examples
 
@@ -174,20 +195,25 @@ From source: `voxcontrol benchmark <config>`.
 .venv\Scripts\python.exe tools\build_exe.py
 ```
 
-The script runs PyInstaller with `packaging/VoxControlResearch.spec`, copies `configs/`, checks that no
-internal path exceeds 120 characters and writes `entregables/VoxControlResearch_<version>_Windows_x64.zip`.
+The script runs PyInstaller with `packaging/VoxControlResearch.spec`, copies `configs/` and `README.md`,
+checks that no internal path exceeds 120 characters and writes
+`entregables/VoxControlResearch_<version>_Windows_x64.zip`.
 
 ## Tests
 ```bat
 .venv\Scripts\python.exe -m pytest -q
 ```
 Unit tests, scientific sanity tests (clear vs ambiguous uncertainty, OOD scores, risk-dependent thresholds,
-non-decreasing personal accuracy after consistent corrections, measured calibration) and GUI tests.
+non-decreasing personal accuracy after consistent corrections, measured calibration), safety and
+reproducibility tests (no action without a chosen target, unresolved slots never run, mandatory confirmation
+in the sandbox, persistent corrections, seeds of the YAML file, no interval with one seed, effective B3
+threshold, context prior, WAV and FLAC files) and GUI tests.
 
 ## Safety
-The research core never touches the operating system: actions only change a simulated desktop. Commands are
-mapped to a whitelist of validated actions with typed slots, and no generated shell command is ever executed.
-In real-execution mode high-risk actions always require confirmation.
+The software never acts on the operating system: every action only changes a simulated desktop, and there
+is no real-execution mode. Commands are mapped to a whitelist of validated actions with typed slots, an action
+with an ambiguous, missing or invalid slot never runs, and no generated shell command is ever executed.
+High-risk actions require confirmation by default.
 
 ## Limitations
 Text data are synthetic and written from templates. Audio experiments use synthetic English speech with white

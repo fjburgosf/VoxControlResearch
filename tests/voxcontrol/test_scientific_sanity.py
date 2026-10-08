@@ -88,11 +88,12 @@ def test_slot_ambiguity_forces_confirmation_with_options(model, data):
     assert checked >= len(data.ambiguous_slot) // 3
 
 
-def test_real_mode_always_confirms_high_risk(model):
+def test_mandatory_confirmation_of_high_risk_in_sandbox(model):
     from voxcontrol.api import VoxModel
-    vm = VoxModel(copy.deepcopy(model), execution="real")
+    vm = VoxModel(copy.deepcopy(model))
     r = vm.process_text("borra el archivo informe.docx")
     assert r.risk == "high" and r.decision != EXECUTE
+    assert "informe.docx" in vm.sandbox.state.files
 
 
 def test_ablation_flags_change_features(data):

@@ -52,6 +52,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "factor": {"es": "Factor", "en": "Factor"},
     "value": {"es": "Valor", "en": "Value"},
     "confirm_exec": {"es": "Confirmar y ejecutar en sandbox", "en": "Confirm and run in sandbox"},
+    "choice": {"es": "Opción a ejecutar:", "en": "Option to run:"},
     "correct_as": {"es": "Corregir como:", "en": "Correct as:"},
     "apply_correction": {"es": "Aplicar corrección", "en": "Apply correction"},
     "sandbox_state": {"es": "Estado del escritorio simulado", "en": "Simulated desktop state"},
@@ -59,9 +60,12 @@ STRINGS: dict[str, dict[str, str]] = {
     "EXECUTE": {"es": "▶ EJECUTAR", "en": "▶ EXECUTE"},
     "CONFIRM": {"es": "? CONFIRMAR", "en": "? CONFIRM"},
     "REJECT": {"es": "✕ RECHAZAR / ACLARAR", "en": "✕ REJECT / CLARIFY"},
-    "corrected": {"es": "Corrección guardada para el usuario '{user}'.", "en": "Correction stored for user '{user}'."},
+    "corrected": {"es": "Corrección guardada para el usuario '{user}'. Se conserva al cerrar el programa y al "
+                        "reentrenar.",
+                  "en": "Correction stored for user '{user}'. It is kept after closing the program and after "
+                        "retraining."},
     "executed": {"es": "Sandbox: {msg}", "en": "Sandbox: {msg}"},
-    "not_executed": {"es": "La decisión fue RECHAZAR: no se ejecuta.", "en": "Decision was REJECT: nothing executed."},
+    "not_executed": {"es": "Sandbox: {msg}", "en": "Sandbox: {msg}"},
     # voice tab
     "record": {"es": "Grabar", "en": "Record"},
     "seconds": {"es": "Duración  t [s]", "en": "Duration  t [s]"},
@@ -77,6 +81,9 @@ STRINGS: dict[str, dict[str, str]] = {
     # adaptation
     "corrections": {"es": "Correcciones guardadas (M_user)", "en": "Stored corrections (M_user)"},
     "export_csv": {"es": "Exportar CSV…", "en": "Export CSV…"},
+    "clear_corrections": {"es": "Borrar todas las correcciones…", "en": "Delete all corrections…"},
+    "clear_confirm": {"es": "¿Borrar todas las correcciones guardadas? No se puede deshacer.",
+                      "en": "Delete every stored correction? This cannot be undone."},
     "col_user": {"es": "Usuario", "en": "User"},
     "col_text": {"es": "Transcripción", "en": "Transcript"},
     "col_wrong": {"es": "Predicha", "en": "Predicted"},
@@ -87,6 +94,18 @@ STRINGS: dict[str, dict[str, str]] = {
     "seeds": {"es": "Semillas (separadas por espacio)", "en": "Seeds (space separated)"},
     "run": {"es": "Ejecutar experimento", "en": "Run experiment"},
     "exp_done": {"es": "Terminado: {id}", "en": "Finished: {id}"},
+    "n_runs": {"es": "{n} corrida(s)", "en": "{n} run(s)"},
+    "exp_note": {"es": "Cada experimento usa únicamente los parámetros de su archivo YAML (costos, predictor, "
+                       "calibrador, detector, umbrales y semillas). La pestaña «Configuración» solo cambia el "
+                       "modelo interactivo de «Probar orden» y «Voz». Al elegir un archivo se cargan sus semillas.",
+                 "en": "Each experiment uses only the parameters of its YAML file (costs, predictor, calibrator, "
+                       "detector, thresholds and seeds). The “Settings” tab only changes the interactive model of "
+                       "“Text test” and “Voice”. Choosing a file loads its seeds."},
+    "one_seed": {"es": "Aviso: con una sola semilla no se estiman la DE ni el IC 95 % (aparecen como NA). Para "
+                       "reproducir las tablas del manual conserve todas las semillas del archivo.",
+                 "en": "Note: with a single seed the SD and the 95% CI are not estimable (shown as NA). To "
+                       "reproduce the tables of the manual keep every seed of the file."},
+    "not_estimable": {"es": "NA", "en": "NA"},
     "exp_desc_main": {"es": "E1/E2/E4/E9: reconocimiento, paráfrasis, OOD y riesgo",
                       "en": "E1/E2/E4/E9: recognition, paraphrase, OOD and risk"},
     # results
@@ -112,10 +131,19 @@ STRINGS: dict[str, dict[str, str]] = {
     "p_calibrator": {"es": "Calibrador", "en": "Calibrator"},
     "p_ood": {"es": "Detector OOD", "en": "OOD detector"},
     "p_mem": {"es": "Umbral de memoria  τ_mem [similitud coseno]", "en": "Memory threshold  τ_mem [cosine similarity]"},
-    "p_tau": {"es": "Umbral fijo B3  τ [–]", "en": "B3 fixed threshold  τ [–]"},
+    "p_context": {"es": "Usar el contexto (prior por aplicación activa)",
+                  "en": "Use context (prior by active application)"},
     "exec_mode": {"es": "Modo de ejecución", "en": "Execution mode"},
-    "mode_sandbox": {"es": "Sandbox (simulado)", "en": "Sandbox (simulated)"},
-    "mandatory": {"es": "Confirmar siempre acciones de riesgo alto", "en": "Always confirm high-risk actions"},
+    "mode_sandbox": {"es": "Todas las acciones se ejecutan en el escritorio simulado (sandbox). No hay ejecución "
+                           "sobre el sistema operativo.",
+                     "en": "Every action runs on the simulated desktop (sandbox). Nothing is executed on the "
+                           "operating system."},
+    "mandatory": {"es": "Confirmar siempre acciones de riesgo alto (también en el sandbox)",
+                  "en": "Always confirm high-risk actions (also in the sandbox)"},
+    "load_warning": {"es": "Cargue solo modelos creados por usted con este programa. Un archivo de modelo (.pkl) "
+                           "de origen desconocido puede ejecutar código en su equipo. ¿Continuar?",
+                     "en": "Only load models you created with this program. A model file (.pkl) of unknown "
+                           "origin can run code on your computer. Continue?"},
     "apply_retrain": {"es": "Aplicar y reentrenar", "en": "Apply and retrain"},
     "thresholds": {"es": "Umbral mínimo de ejecución directa  p* [–]:  bajo {low:.3f} · medio {medium:.3f} · alto {high:.3f}",
                    "en": "Minimum direct-execution threshold  p* [–]:  low {low:.3f} · medium {medium:.3f} · high {high:.3f}"},
@@ -161,6 +189,10 @@ SANDBOX: dict[str, str] = {
     "typed": "texto escrito en {app}", "scroll": "desplazamiento {value}", "no_document": "no hay un documento activo",
     "saved": "se guardó {app}", "sent": "mensaje enviado a {contact}", "file_not_found": "no se encontró {file}",
     "trashed": "{file} se movió a la papelera", "screenshot": "captura de pantalla tomada",
+    "needs_confirmation": "no se ejecutó: la decisión requiere confirmación explícita",
+    "needs_choice": "no se ejecutó: elija primero una de las opciones ({options})",
+    "unresolved_slot": "no se ejecutó: falta resolver {slots}",
+    "rejected": "no se ejecutó: la petición fue rechazada",
 }
 
 VALUES: dict[str, dict[str, str]] = {
@@ -190,7 +222,7 @@ TERMS_ES: dict[str, str] = {
     "acc_old_knowledge": "exactitud en lo ya aprendido", "forgetting": "olvido", "adaptation_gain": "ganancia de adaptación",
     "user_accuracy": "exactitud del usuario", "global_accuracy": "exactitud global",
     "other_users_accuracy": "exactitud de otros usuarios", "wer": "WER", "mean_asr_uncertainty": "U_ASR media",
-    "intent_error": "error de intención", "asr_induced_error": "error causado por el ASR", "correct": "correctas",
+    "intent_error": "error del clasificador con texto de referencia (sin ASR)", "asr_induced_error": "error añadido por el ASR", "correct": "correctas",
     "mean_entropy": "entropía media", "mean_p_correct": "P(correcta) media",
     "asks_when_target_ambiguous": "pregunta ante destino ambiguo", "n": "n",
     # methods and strategies
@@ -249,9 +281,13 @@ TUTORIAL: list[dict] = [
      "action": ("analyse", "abre spotify"), "check": ("analysed", "abre spotify"), "tab": "text"},
     {"title": {"es": "3 · Un destino ambiguo", "en": "3 · An ambiguous target"},
      "body": {"es": "Analice «cierra el chat». Hay dos aplicaciones de chat: el sistema no adivina, CONFIRMA y "
-                    "ofrece las opciones. Además, cerrar es una acción de riesgo alto.",
+                    "ofrece las opciones. Además, cerrar es una acción de riesgo alto. Para ejecutarla elija la "
+                    "aplicación en «Opción a ejecutar» y pulse «Confirmar y ejecutar en sandbox». Sin elegir una "
+                    "opción no se ejecuta nada.",
               "en": "Analyse “cierra el chat”. Two chat applications match: the system does not guess, it "
-                    "CONFIRMS and offers the options. Closing is also a high-risk action."},
+                    "CONFIRMS and offers the options. Closing is also a high-risk action. To run it choose the "
+                    "application under “Option to run” and press “Confirm and run in sandbox”. Nothing runs "
+                    "until an option is chosen."},
      "action": ("analyse", "cierra el chat"), "check": ("analysed", "cierra el chat"), "tab": "text"},
     {"title": {"es": "4 · Una petición desconocida (OOD)", "en": "4 · An unknown request (OOD)"},
      "body": {"es": "Analice «pide un taxi al aeropuerto». No pertenece a ninguna intención registrada: el puntaje "
@@ -282,12 +318,14 @@ TUTORIAL: list[dict] = [
                     "global model. The correction appears under “Adaptation”."},
      "action": ("correct", "cállalo", "mute"), "check": "corrected", "tab": "text"},
     {"title": {"es": "7 · Ejecutar un experimento", "en": "7 · Run an experiment"},
-     "body": {"es": "En «Experimentos» elija «exp_main.yaml», deje una sola semilla (por ejemplo 100) para una "
-                    "prueba rápida y pulse «Ejecutar experimento». Se comparan B1 reglas, B2 argmax, B3 umbral "
-                    "fijo, B4 umbral calibrado y UCIL. Cada corrida recibe un identificador EXP-AAAA-NNNNNN.",
-              "en": "On “Experiments” choose “exp_main.yaml”, keep a single seed (e.g. 100) for a quick run and "
-                    "press “Run experiment”. B1 rules, B2 argmax, B3 fixed threshold, B4 calibrated threshold and "
-                    "UCIL are compared. Each run gets an identifier EXP-YYYY-NNNNNN."},
+     "body": {"es": "En «Experimentos» elija «exp_main.yaml»: aparecen sus diez semillas (100 a 109). Para una "
+                    "prueba rápida deje solo una (por ejemplo 100), sabiendo que con una semilla no se estima el "
+                    "IC 95 %. Pulse «Ejecutar experimento». Se comparan B1 reglas, B2 argmax, B3 umbral fijo, B4 "
+                    "umbral calibrado y UCIL. Cada corrida recibe un identificador EXP-AAAA-NNNNNN.",
+              "en": "On “Experiments” choose “exp_main.yaml”: its ten seeds appear (100 to 109). For a quick run "
+                    "keep only one (e.g. 100), bearing in mind that a single seed gives no 95% CI. Press “Run "
+                    "experiment”. B1 rules, B2 argmax, B3 fixed threshold, B4 calibrated threshold and UCIL are "
+                    "compared. Each run gets an identifier EXP-YYYY-NNNNNN."},
      "action": ("experiment", "exp_main.yaml", "100"), "check": "experiment", "tab": "exp"},
     {"title": {"es": "8 · Leer los resultados", "en": "8 · Read the results"},
      "body": {"es": "En «Resultados» elija el experimento, la tabla «summary_decision_metrics» (media, DE e IC 95 % "

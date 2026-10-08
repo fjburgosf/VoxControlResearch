@@ -44,7 +44,7 @@ class VoxControlApp:
         self.busy = False
         self.base = app_dir()
         self.settings = {"seed": 0, "predictor": "tfidf_logreg", "calibrator": "auto", "ood_detector": "fused",
-                         "memory_threshold": 0.70, "tau_fixed": 0.7, "mandatory": True,
+                         "memory_threshold": 0.70, "use_context": False, "mandatory": True,
                          "costs": {"error": {"low": 2.0, "medium": 5.0, "high": 20.0}, "confirm": 0.3, "reject": 1.0}}
         root.title(f"{SOFTWARE_NAME} {__version__}")
         root.geometry("1180x780")
@@ -203,6 +203,9 @@ class VoxControlApp:
     def _model_path(self) -> Path:
         return self.base / "models" / "ucil_default.pkl"
 
+    def _corrections_path(self) -> Path:
+        return self.base / "models" / "corrections.json"
+
     def _try_load_cached_model(self):
         p = self._model_path()
         if p.exists():
@@ -216,6 +219,7 @@ class VoxControlApp:
 
     def _after_model(self):
         self.model.mandatory_confirm_risk = ("high",) if self.settings["mandatory"] else ()
+        self.model.load_corrections(self._corrections_path())    # corrections survive restarts and retraining
         self.events.add("model")
         self._refresh_status()
         self._refresh_corrections()
@@ -227,7 +231,8 @@ class VoxControlApp:
         def work():
             from ..api import VoxModel
             cfg = {"ucil": {"predictor": s["predictor"], "calibrator": s["calibrator"],
-                            "ood_detector": s["ood_detector"], "memory_threshold": s["memory_threshold"]},
+                            "ood_detector": s["ood_detector"], "memory_threshold": s["memory_threshold"],
+                            "use_context": s["use_context"]},
                    "costs": s["costs"]}
             m = VoxModel.train(seed=int(s["seed"]), config=cfg)
             p = self._model_path()
@@ -241,6 +246,8 @@ class VoxControlApp:
         self._run_bg(work, done)
 
     def load_model_dialog(self):
+        if not messagebox.askokcancel(SOFTWARE_NAME, self.t("load_warning"), icon="warning"):
+            return
         path = filedialog.askopenfilename(filetypes=[("VoxControl model", "*.pkl")])
         if path:
             from ..api import VoxModel
@@ -296,6 +303,12 @@ class VoxControlApp:
 
         right = ttk.Frame(body, padding=(12, 0))
         right.pack(side="left", fill="both", expand=True)
+        ch = ttk.Frame(right)
+        ch.pack(fill="x", pady=(0, 6))
+        self.i18n.bind(ttk.Label(ch), "choice").pack(side="left")
+        self.choice_var = tk.StringVar()
+        self.choice_combo = ttk.Combobox(ch, textvariable=self.choice_var, state="disabled", width=30)
+        self.choice_combo.pack(side="left", padx=6)
         self.i18n.bind(ttk.Button(right, command=self.confirm_and_execute), "confirm_exec").pack(fill="x")
         cr = ttk.Frame(right)
         cr.pack(fill="x", pady=8)
@@ -341,6 +354,9 @@ class VoxControlApp:
         f["f_risk"].configure(text=val(r.risk))
         f["f_decision"].configure(text=self.t(r.decision.upper()), foreground=DECISION_COLOURS[r.decision])
         f["f_options"].configure(text=", ".join(r.options) or "—")
+        if self.choice_combo["values"] != tuple(r.options) or not r.options:
+            self.choice_var.set("")                # a new result never inherits an earlier choice
+        self.choice_combo.configure(values=r.options, state="readonly" if r.options else "disabled")
         self.factor_tree.delete(*self.factor_tree.get_children())
         self.factor_tree.heading("factor", text=self.t("factor"))
         self.factor_tree.heading("value", text=self.t("value"))
@@ -356,17 +372,17 @@ class VoxControlApp:
         if r.options and r.options[0].split(":")[0] in self.registry:
             self.correct_var.set(r.options[0].split(":")[0])
 
-    def confirm_and_execute(self):
+    def confirm_and_execute(self, choice: str | None = None):
         if self.last_result is None:
-            return
-        res = self.model.execute(self.last_result, confirmed=True)
-        if res is None:
-            self.action_msg.configure(text=self.t("not_executed"))
-        else:
-            es = self.i18n.lang == "es" and res.key in SANDBOX
-            self.action_msg.configure(text=self.t("executed", msg=SANDBOX[res.key].format(**res.params)
-                                                  if es else res.message))
+            return None
+        if choice is not None:
+            self.choice_var.set(choice)
+        res = self.model.execute(self.last_result, confirmed=True, choice=self.choice_var.get() or None)
+        es = self.i18n.lang == "es" and res.key in SANDBOX
+        msg = SANDBOX[res.key].format(**res.params) if es else res.message
+        self.action_msg.configure(text=self.t("executed" if res.success else "not_executed", msg=msg))
         self._refresh_sandbox()
+        return res
 
     def apply_correction(self, intent: str | None = None):
         if self.last_result is None or not self._need_model():
@@ -376,6 +392,7 @@ class VoxControlApp:
             return
         user = self.user_var.get() or "default"
         self.model.correct(self.last_result, intent, user=user)
+        self.model.save_corrections(self._corrections_path())
         self.action_msg.configure(text=self.t("corrected", user=user))
         self.events.add("corrected")
         self._refresh_corrections()
@@ -476,7 +493,11 @@ class VoxControlApp:
         for c, w in zip(cols, (90, 420, 140, 140, 100)):
             self.corr_tree.column(c, width=w)
         self.corr_tree.pack(fill="both", expand=True)
-        self.i18n.bind(ttk.Button(f, command=self.export_corrections), "export_csv").pack(anchor="e", pady=6)
+        bar = ttk.Frame(f)
+        bar.pack(fill="x", pady=6)
+        self.i18n.bind(ttk.Button(bar, command=self.export_corrections), "export_csv").pack(side="right")
+        self.i18n.bind(ttk.Button(bar, command=self.clear_corrections), "clear_corrections").pack(side="right",
+                                                                                                padx=6)
 
     def _refresh_corrections(self):
         for c, k in zip(("user", "text", "wrong", "correct", "unc"),
@@ -488,6 +509,15 @@ class VoxControlApp:
         for r in self.model.ucil.memory.records:
             self.corr_tree.insert("", "end", values=(r.user, r.text, r.wrong_intent or "", r.correct_intent,
                                                      "" if r.uncertainty is None else f"{r.uncertainty:.3f}"))
+
+    def clear_corrections(self, ask: bool = True):
+        if not self._need_model():
+            return
+        if ask and not messagebox.askokcancel(SOFTWARE_NAME, self.t("clear_confirm"), icon="warning"):
+            return
+        self.model.clear_corrections()
+        self.model.save_corrections(self._corrections_path())
+        self._refresh_corrections()
 
     def export_corrections(self):
         if not self._need_model():
@@ -510,13 +540,20 @@ class VoxControlApp:
         self.cfg_combo = ttk.Combobox(row, textvariable=self.cfg_var, state="readonly", width=30,
                                       values=self._config_files())
         self.cfg_combo.pack(side="left", padx=6)
+        self.cfg_combo.bind("<<ComboboxSelected>>", lambda e: self._load_config_seeds())
+        self.i18n.bind(ttk.Label(row), "seeds").pack(side="left", padx=(12, 4))
+        self.seeds_var = tk.StringVar(value="")
+        self.seeds_var.trace_add("write", lambda *a: self._refresh_runs())
+        ttk.Entry(row, textvariable=self.seeds_var, width=34).pack(side="left")
+        self.runs_label = ttk.Label(row, foreground="#52514e")
+        self.runs_label.pack(side="left", padx=6)
+        self.i18n.bind(ttk.Button(row, command=self.run_experiment), "run").pack(side="left", padx=8)
+        self.i18n.bind(ttk.Label(f, foreground="#52514e", wraplength=1050, justify="left"), "exp_note").pack(
+            fill="x", pady=(6, 0))
         if self.cfg_combo["values"]:
             self.cfg_combo.current(0)
-        self.i18n.bind(ttk.Label(row), "seeds").pack(side="left", padx=(12, 4))
-        self.seeds_var = tk.StringVar(value="100")
-        ttk.Entry(row, textvariable=self.seeds_var, width=24).pack(side="left")
-        self.i18n.bind(ttk.Button(row, command=self.run_experiment), "run").pack(side="left", padx=8)
-        self.exp_log = scrolledtext.ScrolledText(f, height=26, font=("Consolas", 9))
+            self._load_config_seeds()
+        self.exp_log = scrolledtext.ScrolledText(f, height=24, font=("Consolas", 9))
         self.exp_log.pack(fill="both", expand=True, pady=8)
 
     def _config_dir(self) -> Path:
@@ -527,20 +564,42 @@ class VoxControlApp:
         d = self._config_dir()
         return sorted(p.name for p in d.glob("*.yaml")) if d.exists() else []
 
+    def _seeds(self) -> list[int]:
+        try:
+            return [int(x) for x in self.seeds_var.get().split()]
+        except ValueError:
+            return []
+
+    def _refresh_runs(self):
+        self.runs_label.configure(text=self.t("n_runs", n=len(self._seeds())))
+
+    def _load_config_seeds(self):
+        from ..experiments.runner import load_config
+        name = self.cfg_var.get()
+        if name:
+            seeds = load_config(self._config_dir() / name)["experiment"].get("seeds", [])
+            self.seeds_var.set(" ".join(str(x) for x in seeds))
+
     def run_experiment(self, config: str | None = None, seeds: str | None = None):
         from ..experiments.runner import load_config, run
         if config:
             self.cfg_var.set(config)
+            self._load_config_seeds()
         if seeds:
             self.seeds_var.set(seeds)
         name = self.cfg_var.get()
         if not name:
             return
         cfg = load_config(self._config_dir() / name)
-        cfg["experiment"]["seeds"] = [int(s) for s in self.seeds_var.get().split()]
+        chosen = self._seeds()
+        if not chosen:
+            raise ValueError(self.t("seeds"))
+        cfg["experiment"]["seeds"] = chosen
         log = lambda msg: self.q.put(("log", lambda m: (self.exp_log.insert("end", m + "\n"),
                                                         self.exp_log.see("end")), msg))
-        log(f"{name}  seeds={cfg['experiment']['seeds']}")
+        log(f"{name}  seeds={cfg['experiment']['seeds']}  ({self.t('n_runs', n=len(chosen))})")
+        if len(chosen) < 2:
+            log(self.t("one_seed"))
 
         def done(rec):
             self.exp_log.insert("end", self.t("exp_done", id=rec.id) + "\n")
@@ -641,7 +700,9 @@ class VoxControlApp:
         def head(c):
             return COLUMNS.get(c, {}).get(lang) or term(c)
 
-        body = [[term(_fmt(v)) for v in r] for r in rows[1:500]]
+        na = {j for j, c in enumerate(cols) if c in ("sd", "ci95_low", "ci95_high")}
+        body = [[self.t("not_estimable") if j in na and v == "" else term(_fmt(v)) for j, v in enumerate(r)]
+                for r in rows[1:500]]
         for j, c in enumerate(cols):
             width = max([len(head(c))] + [len(r[j]) for r in body[:60] if j < len(r)])
             self.res_tree.heading(c, text=head(c))
@@ -700,7 +761,7 @@ class VoxControlApp:
                 ("p_calibrator", "calibrator", ["auto", "fusion", "product_temperature", "product_isotonic"]),
                 ("p_ood", "ood_detector", ["fused", "auto", "msp", "energy", "knn", "prototype", "mahalanobis",
                                            "lexical"]),
-                ("p_mem", "memory_threshold", None), ("p_tau", "tau_fixed", None)]
+                ("p_mem", "memory_threshold", None)]
         for i, (label, key, choices) in enumerate(rows):
             self.i18n.bind(ttk.Label(mb), label).grid(row=i, column=0, sticky="w", pady=2)
             var = tk.StringVar(value=str(self.settings[key]))
@@ -708,9 +769,12 @@ class VoxControlApp:
                  else ttk.Entry(mb, textvariable=var, width=10))
             w.grid(row=i, column=1, sticky="w", padx=8)
             self.param_vars[key] = var
+        self.context_var = tk.BooleanVar(value=self.settings["use_context"])
+        self.i18n.bind(ttk.Checkbutton(mb, variable=self.context_var), "p_context").grid(
+            row=len(rows), column=0, columnspan=2, sticky="w", pady=2)
         eb = self.i18n.bind(ttk.LabelFrame(f, padding=8), "exec_mode")
         eb.pack(fill="x")
-        self.i18n.bind(ttk.Label(eb), "mode_sandbox").pack(anchor="w")
+        self.i18n.bind(ttk.Label(eb, wraplength=1000, justify="left"), "mode_sandbox").pack(anchor="w")
         self.mandatory_var = tk.BooleanVar(value=self.settings["mandatory"])
         self.i18n.bind(ttk.Checkbutton(eb, variable=self.mandatory_var), "mandatory").pack(anchor="w")
         self.i18n.bind(ttk.Button(f, command=self.apply_settings), "apply_retrain").pack(anchor="e", pady=8)
@@ -738,7 +802,8 @@ class VoxControlApp:
         self.settings.update({"seed": int(v["seed"].get()), "predictor": v["predictor"].get(),
                               "calibrator": v["calibrator"].get(), "ood_detector": v["ood_detector"].get(),
                               "memory_threshold": float(v["memory_threshold"].get()),
-                              "tau_fixed": float(v["tau_fixed"].get()), "mandatory": bool(self.mandatory_var.get()),
+                              "use_context": bool(self.context_var.get()),
+                              "mandatory": bool(self.mandatory_var.get()),
                               "costs": {"error": dict(c.error), "confirm": c.confirm, "reject": c.reject}})
         self.train_model()
 
